@@ -1,50 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import SearchBar from './SearchBar';
+import { fetchPokemon } from '../services/PokeServices';
+import type { PokemonAPIResponse } from '../services/PokeServices';
+import CreatureCardModal from './CreatureModal';
 
-type Stats = {
-  hp: number | null;
-  attack: number | null;
-  defense: number | null;
-  speed: number | null;
-};
-
-type Pokemon = {
-  id: number | null;
-  name: string | null;
-  type: string | null;
-  skills: string[];
-  evolution: string | null;
-  stats: Stats;
-  badges: string[];
-  evolutionChain: string[];
-  image: string | null;
-};
 
 export default function Pokedex() {
-  
-    const [pokemonList, setPokemonList] = useState<Pokemon[]>([]);
+  const [pokemons, setPokemons] = useState<PokemonAPIResponse[]>([]);
 
-    useEffect(() => {
-      const mockData: Pokemon[] = [];
-      setPokemonList(mockData);
-    }, []);
-
-    const pokemonIds = pokemonList.map(p => p.id);  
+  async function handleSearch(query: string) {
+    const result = await fetchPokemon(query);
+    if (result) {
+      setPokemons([result]);
+    } else {
+      setPokemons([]);
+    }
+  }
 
   return (
     <>
-        <SearchBar 
-            pokemonIds={pokemonIds}
-        />
-    </>
+  <SearchBar onSearch={handleSearch} />
+  <div className="pokedex-list">
+    {pokemons.map((pokemon) => (
+      <CreatureCardModal 
+        key={pokemon.id}
+        image={pokemon.sprites.front_default}
+        id={pokemon.id}
+        name={pokemon.name}
+        type={pokemon.types[0].type.name}
+      />
+    ))}
+  </div>
+</>
+
   );
 }
-
-//        <div className='card'>
-//            <img src={image.pokemon}></img>
-//           <p>#{id.pokemon}</p>
-//            <ul>
-//                <li><p>Name: {pokemon.name}</p></li>
-//                <li><p>Type: {pokemon.type}</p></li>
-//            </ul>
-//        </div>

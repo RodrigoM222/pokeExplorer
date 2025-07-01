@@ -5,8 +5,8 @@ import './index.css'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <main>
-      <img src='' alt='pokemon'></img>
-      <h2>Bienvendidos a esta nueva Pokedex, donde podran tener información importante sobre todos los pokemones del juego.</h2>
+      <img src='' alt='/default-pokemon.png'></img>
+      <h2>Bienvenidos a esta nueva Pokedex, donde podran tener información importante sobre todos los pokemones del juego.</h2>
     </main>
   </StrictMode>,
 )

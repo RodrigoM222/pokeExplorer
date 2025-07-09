@@ -45,21 +45,20 @@ export default function Pokedex() {
   useEffect(() => {
     async function loadInitialPokemons() {
       const starters = ["bulbasaur", "charmander", "squirtle"];
-      const results: Pokemon[] = [];
-
-      for (const name of starters) {
-        const data = await fetchPokemon(name);
-        if (data) {
-          results.push(mapApiToPokemon(data));
-        }
-      }
-
+      
+      const results = await Promise.all(
+        starters.map(async (name) => {
+          const data = await fetchPokemon(name);
+          return data ? mapApiToPokemon(data) : null;
+        })
+      ).then(pokemons => pokemons.filter((pokemon): pokemon is Pokemon => pokemon !== null));
+      
       setAllPokemons(results);
       setFilteredPokemons(results);
     }
-
+  
     loadInitialPokemons();
-  }, []);
+  }, []);  
 
   function handleSearch(query: string) {
     const lowerQuery = query.toLowerCase();
@@ -75,7 +74,7 @@ export default function Pokedex() {
       <SearchBar onSearch={handleSearch} />
 
       <main>
-        <img src='https://avatars.githubusercontent.com/u/19692032?s=280&v=4' alt='/default-pokemon.png'></img>
+        <img src='https://avatars.githubusercontent.com/u/19692032?s=280&v=4' alt=''></img>
         <h2>Bienvenidos a esta nueva Pokedex, donde podrán tener información importante sobre todos los Pokémones del juego.</h2>
       </main>
 

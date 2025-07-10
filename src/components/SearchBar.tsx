@@ -5,6 +5,8 @@ type SearchBarProps = {
   onSearch: (query: string) => void;
 };
 
+const logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/International_Pok%C3%A9mon_logo.svg/2560px-International_Pok%C3%A9mon_logo.svg.png";
+
 export default function SearchBar({ onSearch }: SearchBarProps) {
   const [query, setQuery] = useState("");
 
@@ -26,7 +28,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
       <ul>
         <li>
           <a href="/" className="logo">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/International_Pok%C3%A9mon_logo.svg/2560px-International_Pok%C3%A9mon_logo.svg.png" alt="Logo" />
+          <img src={logo} alt="Logo" />
           </a>
         </li>
         <li>

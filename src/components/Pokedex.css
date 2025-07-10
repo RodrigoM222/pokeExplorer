@@ -5,19 +5,4 @@ main {
     text-align: center;
     background-color: #000;
     margin: 0 0 10px 0;
-    position: relative;
-    height: 280px;
-    padding: 0 0 50px 0;
-    z-index: -2;
-}
-
-main img {
-    position: absolute;
-    top: -40px;
-    z-index: -1;
-}
-
-main h2 {
-    position: absolute;
-    top: 180px;
 }

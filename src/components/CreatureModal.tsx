@@ -12,15 +12,15 @@ export default function CreatureCardModal({ pokemon }: CreatureCardModalProps) {
       <img src={pokemon.image ?? ''} alt={`${pokemon.name}`} />
       <p>#{pokemon.id}</p>
       <ul>
-        <li><p>Name: {pokemon.name}</p></li>
-        <li>
-          <p>Type/s:</p>
-          <ul>
-            {pokemon.types.map((type, idx) => (
-              <li key={idx}>{type}</li>
-            ))}
-          </ul>
-        </li>
+          <li><p>Name: {pokemon.name}</p></li>
+          <li>
+            <p>Type/s:</p>
+            <ul>
+              {pokemon.types.map((type, idx) => (
+                <li key={`${pokemon.name}_${idx}`}>{type}</li>
+              ))}
+            </ul>
+          </li>
       </ul>
     </div>
   );

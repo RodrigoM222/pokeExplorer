@@ -14,7 +14,7 @@ export default function CreatureCardModal({ pokemon }: CreatureCardModalProps) {
       <ul>
         <li><p>Name: {pokemon.name}</p></li>
         <li>
-          <p>Types:</p>
+          <p>Type/s:</p>
           <ul>
             {pokemon.types.map((type, idx) => (
               <li key={idx}>{type}</li>

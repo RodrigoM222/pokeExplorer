@@ -10,8 +10,8 @@ export default function CreatureCardModal({ pokemon }: CreatureCardModalProps) {
   return (
     <div className="card">
       <img src={pokemon.image ?? ''} alt={`${pokemon.name}`} />
-      <p>#{pokemon.id}</p>
-      <ul>
+      <strong>#{pokemon.id}</strong>
+      <ul className='tarjet'>
           <li><p>Name: {pokemon.name}</p></li>
           <li>
             <p>Type/s:</p>

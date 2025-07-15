@@ -6,3 +6,7 @@ main {
     background-color: #000;
     margin: 0 0 10px 0;
 }
+
+main img {
+    padding: 20px 0;
+}

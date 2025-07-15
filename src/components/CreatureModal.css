@@ -1,5 +1,47 @@
-.card ul {
-    list-style-type: none;
-    padding: 0;
+.card {
+    background-color: #FFDE00;
+    margin: 40px auto 0;
+    width: 50%;
+    transition: transform 0.3s ease-in-out;
+    cursor: pointer;
 }
+
+.card:hover {
+    transform: scale(1.0125);
+    transition: transform 0.3s ease-in-out;
+}
+
+.card img {
+    width: 100px;
+    height: auto;
+    background-color: #ffff;
+    display: flex;
+    margin: auto;
+}
+
+.card p {
+    font-size: 18px;
+}
+
+.card strong {
+    width: 100%;
+    margin: 10px auto 0;
+    padding: 5px 0;
+    display: flex;
+    justify-content: center;
+    background-color: #20d;
+}
+
+.card .tarjet {
+    list-style-type: none;
+    padding: 5px 0;
+    width: 100%;
+    background-color: #20d;
+}
+
+.card .tarjet li {
+    color: #fff;
+    margin: 0 0 0 40px;
+}
+
 

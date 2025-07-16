@@ -62,7 +62,7 @@ export default function Pokedex() {
   return (
     <>
       <SearchBar onSearch={handleSearch} />
-      <main>
+      <main className='Pokedex'>
         <img src={PokeAPI} alt='logo PokéApi' />
         <h2>Bienvenidos a esta nueva Pokedex, donde podrán tener información importante sobre todos los Pokémones del juego.</h2>
       </main>

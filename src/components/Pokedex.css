@@ -6,3 +6,7 @@ main {
     background-color: #000;
     margin: 0 0 10px 0;
 }
+
+.Pokedex img {
+    padding: 30px 0;
+}

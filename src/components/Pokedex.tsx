@@ -5,6 +5,7 @@ import { fetchPokemon } from '../services/PokeServices';
 import type { PokemonAPIResponse } from '../services/PokeServices';
 import type { Pokemon, PokemonType } from '../types';
 import './Pokedex.css';
+import PokeAPI from '../assets/PokeAPI.png';
 
 function mapApiToPokemon(apiData: PokemonAPIResponse): Pokemon {
   return {
@@ -61,8 +62,8 @@ export default function Pokedex() {
   return (
     <>
       <SearchBar onSearch={handleSearch} />
-      <main>
-        <img src='https://avatars.githubusercontent.com/u/19692032?s=280&v=4' alt='PokeApi' />
+      <main className='Pokedex'>
+        <img src={PokeAPI} alt='logo PokéApi' />
         <h2>Bienvenidos a esta nueva Pokedex, donde podrán tener información importante sobre todos los Pokémones del juego.</h2>
       </main>
 

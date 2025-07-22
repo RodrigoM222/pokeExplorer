@@ -18,11 +18,22 @@ export type PokemonType =
   | "steel"
   | "fairy";
 
+export type Stat = {
+  name: string;
+  base_stat: number;
+};
+
 export type Stats = {
   hp: number | null;
   attack: number | null;
   defense: number | null;
   speed: number | null;
+};
+
+export type Ability = {
+  ability: {
+  name: string;
+  };
 };
 
 export type Pokemon = {
@@ -35,4 +46,9 @@ export type Pokemon = {
   badges: string[];
   evolutionChain: string[]; // Toda la cadena de evolución
   image: string | null;
+};
+
+export type BasicPokemonInfo = {
+  name: string;
+  id: number;
 };

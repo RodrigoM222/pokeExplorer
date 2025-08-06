@@ -1,79 +1,128 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import SearchBar from './SearchBar';
-import CreatureCardModal from './CreatureModal';
-import { fetchPokemon } from '../services/PokeServices';
-import type { PokemonAPIResponse } from '../services/PokeServices';
-import type { Pokemon, PokemonType } from '../types';
+import CreatureCard from './CreatureCard';
+import { fetchPokemon, fetchAllPokemonBasicInfo } from '../services/PokeServices';
+import type { Pokemon, PokemonType, BasicPokemonInfo } from '../types';
 import './Pokedex.css';
-import PokeAPI from '../assets/PokeAPI.png';
 
-function mapApiToPokemon(apiData: PokemonAPIResponse): Pokemon {
-  return {
-    id: apiData.id,
-    name: apiData.name,
-    types: apiData.types.map(t => t.type.name as PokemonType),
-    skills: [],
-    evolution: [],
-    stats: { hp: null, attack: null, defense: null, speed: null },
-    badges: [],
-    evolutionChain: [],
-    image: apiData.sprites.front_default
-  };
-}
+const PAGE_SIZE = 20;
+
+const validPokemonTypes: PokemonType[] = [
+  "normal", "fire", "water", "grass", "electric",
+  "ice", "fighting", "poison", "ground", "flying",
+  "psychic", "bug", "rock", "ghost", "dragon",
+  "dark", "steel", "fairy"
+];
 
 export default function Pokedex() {
-  const [allPokemons, setAllPokemons] = useState<Pokemon[]>([]);
-  const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[]>([]);
+  const [allBasicInfo, setAllBasicInfo] = useState<BasicPokemonInfo[]>([]);
+  const [filteredInfo, setFilteredInfo] = useState<BasicPokemonInfo[]>([]);
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const mapApiDataToPokemon = (apiData: any): Pokemon => {
+    const stats = apiData.stats.reduce((acc: any, stat: any) => {
+      if (stat.stat.name === 'hp') acc.hp = stat.base_stat;
+      if (stat.stat.name === 'attack') acc.attack = stat.base_stat;
+      if (stat.stat.name === 'defense') acc.defense = stat.base_stat;
+      if (stat.stat.name === 'speed') acc.speed = stat.base_stat;
+      return acc;
+    }, { hp: 0, attack: 0, defense: 0, speed: 0 });
+
+    return {
+      id: apiData.id,
+      name: apiData.name,
+      types: apiData.types.map((t: any) => {
+        const typeName = t.type.name.toLowerCase();
+        return validPokemonTypes.includes(typeName as PokemonType) 
+          ? typeName as PokemonType 
+          : 'normal';
+      }),
+      skills: apiData.abilities.map((a: any) => a.ability.name),
+      evolution: [],
+      stats,
+      badges: [],
+      evolutionChain: [],
+      image: apiData.sprites.other?.['official-artwork']?.front_default || apiData.sprites.front_default || null
+    };
+  };
 
   useEffect(() => {
-    async function loadInitialPokemons() {
-      try {
-        const starters = ["bulbasaur", "charmander", "squirtle"];
-        const pokemonsData = await Promise.all(
-          starters.map(async (name) => {
-            const data = await fetchPokemon(name);
-            return data ? mapApiToPokemon(data) : null;
-          })
-        );
-
-        const results = pokemonsData.filter((p): p is Pokemon => p !== null);
-
-        setAllPokemons(results);
-        setFilteredPokemons(results);
-      } catch (error) {
-        console.error("Error loading initial pokemons:", error);
-        
-        setAllPokemons([]);
-        setFilteredPokemons([]);
-      }
+    async function loadBasicInfo() {
+      const info = await fetchAllPokemonBasicInfo();
+      setAllBasicInfo(info);
+      setFilteredInfo(info);
     }
-
-    loadInitialPokemons();
+    loadBasicInfo();
   }, []);
 
-  function handleSearch(query: string) {
-    const lowerQuery = query.toLowerCase();
-    const filtered = allPokemons.filter(p =>
-      p.name?.includes(lowerQuery) || String(p.id).includes(lowerQuery)
+  useEffect(() => {
+    async function loadVisiblePokemons() {
+      const slice = filteredInfo.slice(0, visibleCount);
+      const data = await Promise.all(
+        slice.map(async ({ name }) => {
+          try {
+            const apiData = await fetchPokemon(name);
+            return apiData ? mapApiDataToPokemon(apiData) : null;
+          } catch (error) {
+            console.error(`Error al cargar el Pokémon ${name}:`, error);
+            return null;
+          }
+        })
+      );
+      setPokemons(data.filter((p): p is Pokemon => p !== null));
+    }
+
+    if (filteredInfo.length > 0) {
+      loadVisiblePokemons();
+    }
+  }, [filteredInfo, visibleCount]);
+
+  useEffect(() => {
+    if (!bottomRef.current) return;
+
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisibleCount((prev) => prev + PAGE_SIZE);
+      }
+    }, { threshold: 0.1 });
+
+    observer.current.observe(bottomRef.current);
+
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, []);
+
+  const handleSearch = useCallback((query: string) => {
+    const lower = query.toLowerCase();
+    const filtered = allBasicInfo.filter(p =>
+      p.name.includes(lower) || String(p.id).includes(lower)
     );
-    setFilteredPokemons(filtered);
-  }
+    setFilteredInfo(filtered);
+    setVisibleCount(PAGE_SIZE);
+  }, [allBasicInfo]);
 
   return (
     <>
       <SearchBar onSearch={handleSearch} />
-      <main className='Pokedex'>
-        <img src={PokeAPI} alt='logo PokéApi' />
-        <h2>Bienvenidos a esta nueva Pokedex, donde podrán tener información importante sobre todos los Pokémones del juego.</h2>
+      <main className="Pokedex">
+        <img src='https://avatars.githubusercontent.com/u/19692032?s=280&v=4' alt='logo PokeAPI'/>
+        <h2>Bienvenidos a esta nueva Pokedex donde podras encontrar información sobre los Pokemones del juego.</h2>
       </main>
 
       <div className="pokedex-list">
-        {filteredPokemons.map((pokemon) => (
-          <CreatureCardModal 
-            key={pokemon.id ?? 0}
+        {pokemons.map((pokemon) => (
+          <CreatureCard 
+            key={pokemon.id}
             pokemon={pokemon}
           />
         ))}
+        <div ref={bottomRef} style={{ height: 1 }} />
       </div>
     </>
   );

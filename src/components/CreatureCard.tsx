@@ -1,12 +1,12 @@
 import React from 'react';
 import type { Pokemon } from '../types';
-import './CreatureModal.css';
+import './CreatureCard.css';
 
-type CreatureCardModalProps = {
+type CreatureCardProps = {
   pokemon: Pokemon;
 };
 
-export default function CreatureCardModal({ pokemon }: CreatureCardModalProps) {
+export default function CreatureCard({ pokemon }: CreatureCardProps) {
   return (
     <div className="card">
       <img src={pokemon.image ?? ''} alt={`${pokemon.name}`} />

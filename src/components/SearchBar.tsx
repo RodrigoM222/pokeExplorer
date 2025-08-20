@@ -9,6 +9,7 @@ const logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Internat
 
 export default function SearchBar({ onSearch }: SearchBarProps) {
   const [query, setQuery] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
@@ -16,31 +17,69 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
 
   const handleSearchClick = () => {
     onSearch(query);
+    if (menuOpen) setMenuOpen(false);
   };
 
   const handleClear = () => {
     setQuery("");
     onSearch("");
+    if (menuOpen) setMenuOpen(false);
+  };
+
+  const handleOverlayKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+      setMenuOpen(false);
+    }
+  };
+
+  const handleMenuToggleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      setMenuOpen(true);
+    }
   };
 
   return (
-    <header className="main-header">
-      <ul>
-        <li>
-          <a href="/" className="logo">
+    <>
+      {menuOpen && (
+        <div
+          className="overlay"
+          tabIndex={0}
+          onClick={() => setMenuOpen(false)}
+          onKeyDown={handleOverlayKeyDown}
+        ></div>
+      )}
+      
+      <div className="top-bar">
+        <a href="/" className="logo">
           <img src={logo} alt="Logo" />
-          </a>
-        </li>
-        <li>
+        </a>
+        <div 
+          className="menu-toggle" 
+          role="button"
+          tabIndex={0}
+          aria-label="Open menu"
+          onClick={() => setMenuOpen(true)}
+          onKeyDown={handleMenuToggleKeyDown}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <header className={`main-header ${menuOpen ? 'open' : ''}`}>
+        <a href="/" className="logo">
+          <img src={logo} alt="Logo" />
+        </a>
+
+        <div className="search-controls">
           <input
             type="text"
             placeholder="Buscar por nombre o ID"
             value={query}
             onChange={handleInputChange}
           />
-
           <button onClick={handleClear}>❌</button>
-
           <svg
             className="magnifying-glass"
             xmlns="http://www.w3.org/2000/svg"
@@ -49,8 +88,8 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
           >
             <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
           </svg>
-        </li>
-      </ul>
-    </header>
+        </div>
+      </header>
+    </>
   );
 }

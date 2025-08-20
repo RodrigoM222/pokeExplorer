@@ -1,7 +1,7 @@
 .card {
     background-color: #FFDE00;
     margin: 40px auto 0;
-    width: 50%;
+    max-width: 768px;
     transition: transform 0.3s ease-in-out;
     cursor: pointer;
     border-radius: 10px;

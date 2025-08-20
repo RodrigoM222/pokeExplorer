@@ -48,17 +48,17 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
           onKeyDown={handleOverlayKeyDown}
         ></div>
       )}
-      
+
       <div className="top-bar">
         <a href="/" className="logo">
           <img src={logo} alt="Logo" />
         </a>
-        <div 
-          className="menu-toggle" 
+        <div
+          className={`menu-toggle ${menuOpen ? "open" : ""}`}
           role="button"
           tabIndex={0}
-          aria-label="Open menu"
-          onClick={() => setMenuOpen(true)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          onClick={() => setMenuOpen(!menuOpen)}
           onKeyDown={handleMenuToggleKeyDown}
         >
           <span></span>

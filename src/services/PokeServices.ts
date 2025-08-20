@@ -27,7 +27,7 @@ const BASE_URL = 'https://pokeapi.co/api/v2/pokemon';
 
 export async function fetchAllPokemonBasicInfo(): Promise<{ name: string; id: number }[]> {
   try {
-    const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100000');
+    const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1025');
     const data = await res.json();
     return data.results.map((p: { name: string }, index: number) => ({
       name: p.name,

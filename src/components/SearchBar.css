@@ -91,7 +91,7 @@
       background: #fff;
       margin: 1px 0;
       border-radius: 2px;
-      transition: 1.0s all ease;
+      transition: 0.6s all ease;
   }
 
   .menu-toggle.open span:nth-child(1) {

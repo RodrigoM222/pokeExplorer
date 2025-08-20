@@ -138,7 +138,7 @@ export default function Pokedex() {
           ))
         ) : (
           <p className="no-results">
-            No se encontraron coincidencias con tu búsqueda.  
+            No se encontraron coincidencias con tu búsqueda.
             Pruebe con otro nombre o número de Pokédex.
           </p>
         )}

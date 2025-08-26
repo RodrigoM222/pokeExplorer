@@ -17,6 +17,7 @@ export async function fetchPokemon(query: string): Promise<PokemonAPIResponse | 
   try {
     const response = await fetch(`${BASE_URL}/${query.toLowerCase()}`);
     if (!response.ok) throw new Error('Pokémon no encontrado');
+
     const data: PokemonAPIResponse = await response.json();
     return data;
   } catch (error) {
@@ -29,9 +30,10 @@ export async function fetchAllPokemonBasicInfo(): Promise<{ name: string; id: nu
   try {
     const response = await fetch(`${BASE_URL}?limit=1025`);
     if (!response.ok) throw new Error('Error al obtener la lista de Pokémon');
-    const data = await response.json();
-    return data.results.map((pokemon: { name: string }, index: number) => ({
-      name: pokemon.name,
+    const { results } = await response.json();
+
+    return results.map((p: { name: string }, index: number) => ({
+      name: p.name,
       id: index + 1,
     }));
   } catch (error) {

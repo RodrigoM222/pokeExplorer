@@ -20,7 +20,8 @@ export default function Pokedex() {
   const [filteredInfo, setFilteredInfo] = useState<BasicPokemonInfo[]>([]);
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -57,6 +58,7 @@ export default function Pokedex() {
       const limited = info.slice(0, MAX_POKEMON);
       setAllBasicInfo(limited);
       setFilteredInfo(limited);
+      setIsLoadingInitial(false);
     }
     loadBasicInfo();
   }, []);
@@ -68,7 +70,12 @@ export default function Pokedex() {
         return;
       }
 
-      setIsLoading(true);
+      if (pokemons.length > 0) {
+        setIsLoadingMore(true);
+      } else {
+        setIsLoadingInitial(true);
+      }
+
       const slice = filteredInfo.slice(0, visibleCount);
       const data = await Promise.all(
         slice.map(async ({ name }) => {
@@ -81,8 +88,10 @@ export default function Pokedex() {
           }
         })
       );
+
       setPokemons(data.filter((p): p is Pokemon => p !== null));
-      setIsLoading(false);
+      setIsLoadingInitial(false);
+      setIsLoadingMore(false);
     }
 
     loadVisiblePokemons();
@@ -103,9 +112,7 @@ export default function Pokedex() {
     observer.current.observe(bottomRef.current);
 
     return () => {
-      if (observer.current) {
-        observer.current.disconnect();
-      }
+      if (observer.current) observer.current.disconnect();
     };
   }, []);
 
@@ -123,26 +130,28 @@ export default function Pokedex() {
       <SearchBar onSearch={handleSearch} />
       <main className="Pokedex">
         <img src='https://avatars.githubusercontent.com/u/19692032?s=280&v=4' alt='logo PokeAPI' />
-        <h2>Bienvenidos a esta nueva Pokedex donde podras encontrar información sobre los Pokemones del juego.</h2>
+        <h2>Bienvenidos a esta nueva Pokedex donde podrás encontrar información sobre los Pokemones del juego.</h2>
       </main>
 
       <div className="pokedex-list">
-        {isLoading ? (
-          <p className="loading">Cargando...</p>
-        ) : pokemons.length > 0 ? (
+        {isLoadingInitial && <p className="loading">Cargando...</p>}
+
+        {!isLoadingInitial && pokemons.length > 0 && (
           pokemons.map((pokemon) => (
-            <CreatureCard
-              key={pokemon.id}
-              pokemon={pokemon}
-            />
+            <CreatureCard key={pokemon.id} pokemon={pokemon} />
           ))
-        ) : (
+        )}
+
+        {!isLoadingInitial && pokemons.length === 0 && (
           <p className="no-results">
             No se encontraron coincidencias con tu búsqueda.
-            Pruebe con otro nombre o número de Pokédex.
+            Prueba con otro nombre o número de Pokédex.
           </p>
         )}
+
         <div ref={bottomRef} style={{ height: 1 }} />
+
+        {isLoadingMore && <p className="loading">Cargando más Pokémon...</p>}
       </div>
     </>
   );

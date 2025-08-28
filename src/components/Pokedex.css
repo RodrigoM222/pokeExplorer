@@ -12,9 +12,16 @@
 }
 
 .loading,
-.no-results {
+.no-results,
+.error-message {
   text-align: center;
   color: #adadad;
   font-size: 20px;
   margin: 25px 0;
+}
+
+.error-message {
+  color: #cb290d;
+  font-weight: bold;
+  font-size: 22px;
 }

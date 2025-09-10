@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PokemonType } from '../types';
-import { typeStyles, capitalizeFirst } from '../types';
+import { capitalizeFirst } from '../types';
 import './TypeBadge.css';
 
 type TypeBadgeProps = {
@@ -10,17 +10,20 @@ type TypeBadgeProps = {
 
 export default function TypeBadge({ type, size = 'medium' }: TypeBadgeProps) {
   const normalizedType = type.toLowerCase();
-  
-  const style = typeStyles[normalizedType as PokemonType] || typeStyles.default;
   const displayName = capitalizeFirst(normalizedType);
+
+  const typeClass = `type-badge--${normalizedType}`;
+  const isValidType = [
+    'normal', 'fire', 'water', 'grass', 'electric', 'ice', 'fighting',
+    'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost',
+    'dragon', 'dark', 'steel', 'fairy'
+  ].includes(normalizedType);
+
+  const badgeClass = `type-badge type-badge--${size} ${isValidType ? typeClass : 'type-badge--default'}`;
 
   return (
     <span
-      className={`type-badge type-badge--${size}`}
-      style={{
-        backgroundColor: style.backgroundColor,
-        color: style.color
-      }}
+      className={badgeClass}
       aria-label={`Type: ${displayName}`}
       title={displayName}
     >

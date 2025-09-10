@@ -127,8 +127,6 @@ export default function Pokedex() {
     const trimmed = value.trim();
     setQuery(trimmed);
     setSearchError('');
-    setHasMore(false);
-
     if (trimmed === '') {
       setPokemons([]);
       setOffset(0);

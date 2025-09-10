@@ -31,6 +31,7 @@ export default function Pokedex() {
 
   const observer = useRef<IntersectionObserver | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const loadingRef = useRef<boolean>(false);
 
   const mapApiDataToPokemon = (apiData: any): Pokemon => {
     const stats = apiData.stats?.reduce((acc: any, stat: any) => {
@@ -65,61 +66,68 @@ export default function Pokedex() {
   const validateInput = (input: string): string | null => {
     const trimmed = input.trim();
     
-    if (trimmed === '') {
-      return null;
-    }
+    if (trimmed === '') return null;
 
     const numericRegex = /^\d+$/;
-    if (numericRegex.test(trimmed)) {
-      return 'numeric';
-    }
+    if (numericRegex.test(trimmed)) return 'numeric';
 
     const nameRegex = /^[a-zA-Z\-]+$/;
-    if (nameRegex.test(trimmed)) {
-      return 'text';
-    }
+    if (nameRegex.test(trimmed)) return 'text';
 
     return 'invalid';
   };
 
   const loadPokemons = useCallback(async (currentOffset: number) => {
-    if (isLoading || !hasMore || query.trim() !== '') return;
+    if (loadingRef.current || !hasMore || query.trim() !== '') return;
 
+    loadingRef.current = true;
     setIsLoading(true);
     setSearchError('');
     
-    const list = await fetchPokemonList(currentOffset, PAGE_SIZE);
+    try {
+      const list = await fetchPokemonList(currentOffset, PAGE_SIZE);
 
-    if (list.length === 0) {
-      setHasMore(false);
+      if (list.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      const data = await Promise.all(
+        list.map(async (p) => {
+          try {
+            const apiData = await fetchPokemon(p.name);
+            return apiData ? mapApiDataToPokemon(apiData) : null;
+          } catch (error) {
+            console.error(`Error fetching ${p.name}:`, error);
+            return null;
+          }
+        })
+      );
+
+      const validPokemons = data.filter((p): p is Pokemon => p !== null);
+      
+      setPokemons((prev) => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const newPokemons = validPokemons.filter(p => !existingIds.has(p.id));
+        return [...prev, ...newPokemons];
+      });
+
+      setOffset(currentOffset + PAGE_SIZE);
+      
+    } catch (error) {
+      console.error('Error loading pokemons:', error);
+      setSearchError('Error al cargar más Pokémon');
+    } finally {
       setIsLoading(false);
-      return;
+      loadingRef.current = false;
     }
-
-    const data = await Promise.all(
-      list.map(async (p) => {
-        const apiData = await fetchPokemon(p.name);
-        return apiData ? mapApiDataToPokemon(apiData) : null;
-      })
-    );
-
-    const validPokemons = data.filter((p): p is Pokemon => p !== null);
-    
-    setPokemons((prev) => {
-      const existingIds = new Set(prev.map(p => p.id));
-      const newPokemons = validPokemons.filter(p => !existingIds.has(p.id));
-      return [...prev, ...newPokemons];
-    });
-
-    setOffset(currentOffset + PAGE_SIZE);
-    setIsLoading(false);
-    setIsInitialLoad(false);
-  }, [isLoading, hasMore, query]);
+  }, [hasMore, query]);
 
   const handleSearch = useCallback(async (value: string) => {
     const trimmed = value.trim();
     setQuery(trimmed);
     setSearchError('');
+    setHasMore(false);
 
     if (trimmed === '') {
       setPokemons([]);
@@ -214,26 +222,31 @@ export default function Pokedex() {
   }, []);
 
   useEffect(() => {
-    if (!bottomRef.current || query.trim() !== '' || !hasMore) return;
+    if (!bottomRef.current || query.trim() !== '' || !hasMore || isLoading) return;
 
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !isLoading) {
-        loadPokemons(offset);
-      }
-    }, { threshold: 0.1 });
+    const currentObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingRef.current) {
+          loadPokemons(offset);
+        }
+      },
+      { threshold: 0.5, rootMargin: '100px' }
+    );
 
-    if (bottomRef.current) {
-      observer.current.observe(bottomRef.current);
-    }
+    currentObserver.observe(bottomRef.current);
+    observer.current = currentObserver;
 
     return () => {
-      if (observer.current) observer.current.disconnect();
+      if (observer.current) {
+        observer.current.disconnect();
+      }
     };
   }, [loadPokemons, query, hasMore, isLoading, offset]);
 
   useEffect(() => {
     if (isInitialLoad && query.trim() === '' && pokemons.length === 0) {
       loadPokemons(0);
+      setIsInitialLoad(false);
     }
   }, [isInitialLoad, query, pokemons.length, loadPokemons]);
 
@@ -260,14 +273,14 @@ export default function Pokedex() {
       <div className="pokedex-list">
         {searchError && (
           <div className="message-container">
-            <p className="error-message"> {searchError}</p>
+            <p className="error-message">{searchError}</p>
           </div>
         )}
 
         {pokemons.length > 0 ? (
           <div className="pokemon-grid">
             {pokemons.map((pokemon) => (
-              <CreatureCard key={pokemon.id} pokemon={pokemon} />
+              <CreatureCard key={`${pokemon.id}-${pokemon.name}`} pokemon={pokemon} />
             ))}
           </div>
         ) : (
@@ -284,7 +297,10 @@ export default function Pokedex() {
           </div>
         )}
         
-        <div ref={bottomRef} className="observer-element" />
+        <div 
+          ref={bottomRef} 
+          className="observer-element"
+        />
       </div>
     </>
   );

@@ -1,0 +1,33 @@
+.type-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 2px;
+    min-width: 75px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .type-badge--small {
+    font-size: 10px;
+    padding: 2px 8px;
+    min-width: 50px;
+  }
+  
+  .type-badge--medium {
+    font-size: 12px;
+    padding: 4px 12px;
+    min-width: 60px;
+  }
+  
+  .type-badge--large {
+    font-size: 14px;
+    padding: 6px 16px;
+    min-width: 70px;
+  }
+  

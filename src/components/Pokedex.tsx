@@ -13,6 +13,11 @@ import './Pokedex.css';
 
 const PAGE_SIZE = 20;
 
+const OBSERVER_CONFIG = {
+  THRESHOLD: 0.5 as const,
+  ROOT_MARGIN: '100px' as const,
+} as const;
+
 const validPokemonTypes: PokemonType[] = [
   "normal", "fire", "water", "grass", "electric",
   "ice", "fighting", "poison", "ground", "flying",
@@ -228,7 +233,10 @@ export default function Pokedex() {
           loadPokemons(offset);
         }
       },
-      { threshold: 0.5, rootMargin: '100px' }
+      { 
+        threshold: OBSERVER_CONFIG.THRESHOLD, 
+        rootMargin: OBSERVER_CONFIG.ROOT_MARGIN 
+      }
     );
 
     currentObserver.observe(bottomRef.current);

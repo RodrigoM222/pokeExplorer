@@ -1,22 +1,8 @@
 export type PokemonType = 
-  | "normal"
-  | "fire"
-  | "water"
-  | "grass"
-  | "electric"
-  | "ice"
-  | "fighting"
-  | "poison"
-  | "ground"
-  | "flying"
-  | "psychic"
-  | "bug"
-  | "rock"
-  | "ghost"
-  | "dragon"
-  | "dark"
-  | "steel"
-  | "fairy";
+  | "normal" | "fire" | "water" | "grass" | "electric"
+  | "ice" | "fighting" | "poison" | "ground" | "flying"
+  | "psychic" | "bug" | "rock" | "ghost" | "dragon"
+  | "dark" | "steel" | "fairy";
 
 export type Stat = {
   name: string;
@@ -32,7 +18,7 @@ export type Stats = {
 
 export type Ability = {
   ability: {
-  name: string;
+    name: string;
   };
 };
 
@@ -41,14 +27,18 @@ export type Pokemon = {
   name: string | null;
   types: PokemonType[];
   skills: string[];
-  evolution: string[];  // Siguiente evolución
+  evolution: string[];
   stats: Stats;
   badges: string[];
-  evolutionChain: string[]; // Toda la cadena de evolución
+  evolutionChain: string[];
   image: string | null;
 };
 
 export type BasicPokemonInfo = {
   name: string;
   id: number;
+};
+
+export const capitalizeFirst = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 };

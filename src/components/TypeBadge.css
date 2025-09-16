@@ -1,0 +1,138 @@
+.type-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 4px;
+  min-width: 80px;
+  text-align: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.type-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+.type-badge--small {
+  font-size: 12px;
+  padding: 6px 12px;
+  min-width: 70px;
+}
+
+.type-badge--medium {
+  font-size: 14px;
+  padding: 8px 16px;
+  min-width: 80px;
+}
+
+.type-badge--large {
+  font-size: 16px;
+  padding: 10px 20px;
+  min-width: 90px;
+}
+
+.type-badge--normal {
+  background-color: #A8A878;
+  color: #FFFFFF;
+}
+
+.type-badge--fire {
+  background-color: #F08030;
+  color: #FFFFFF;
+}
+
+.type-badge--water {
+  background-color: #6890F0;
+  color: #FFFFFF;
+}
+
+.type-badge--grass {
+  background-color: #78C850;
+  color: #FFFFFF;
+}
+
+.type-badge--electric {
+  background-color: #F8D030;
+  color: #000000;
+}
+
+.type-badge--ice {
+  background-color: #98D8D8;
+  color: #000000;
+}
+
+.type-badge--fighting {
+  background-color: #C03028;
+  color: #FFFFFF;
+}
+
+.type-badge--poison {
+  background-color: #A040A0;
+  color: #FFFFFF;
+}
+
+.type-badge--ground {
+  background-color: #E0C068;
+  color: #000000;
+}
+
+.type-badge--flying {
+  background-color: #A890F0;
+  color: #FFFFFF;
+}
+
+.type-badge--psychic {
+  background-color: #F85888;
+  color: #FFFFFF;
+}
+
+.type-badge--bug {
+  background-color: #A8B820;
+  color: #FFFFFF;
+}
+
+.type-badge--rock {
+  background-color: #B8A038;
+  color: #FFFFFF;
+}
+
+.type-badge--ghost {
+  background-color: #705898;
+  color: #FFFFFF;
+}
+
+.type-badge--dragon {
+  background-color: #7038F8;
+  color: #FFFFFF;
+}
+
+.type-badge--dark {
+  background-color: #705848;
+  color: #FFFFFF;
+}
+
+.type-badge--steel {
+  background-color: #B8B8D0;
+  color: #000000;
+}
+
+.type-badge--fairy {
+  background-color: #EE99AC;
+  color: #000000;
+}
+
+.type-badge--default {
+  background-color: #68A090;
+  color: #FFFFFF;
+}
+
+.type-badge:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}

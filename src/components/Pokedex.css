@@ -25,3 +25,9 @@
   font-weight: bold;
   font-size: 22px;
 }
+
+.observer-element {
+  height: 2px;
+  background: transparent;
+  margin: 10px 0;
+}

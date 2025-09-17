@@ -14,6 +14,8 @@ export type Stats = {
   attack: number | null;
   defense: number | null;
   speed: number | null;
+  special_attack?: number | null;
+  special_defense?: number | null;
 };
 
 export type Ability = {
@@ -32,6 +34,10 @@ export type Pokemon = {
   badges: string[];
   evolutionChain: string[];
   image: string | null;
+  height?: number;
+  weight?: number;
+  base_experience?: number;
+  abilities?: string[];
 };
 
 export type BasicPokemonInfo = {

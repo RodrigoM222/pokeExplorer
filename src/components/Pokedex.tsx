@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import SearchBar from './SearchBar';
 import CreatureCard from './CreatureCard';
+import CreatureModal from './CreatureModal';
 import { 
   fetchPokemon, 
   fetchPokemonList, 
@@ -33,10 +34,23 @@ export default function Pokedex() {
   const [hasMore, setHasMore] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [searchError, setSearchError] = useState<string>('');
+  
+  const [selectedPokemonId, setSelectedPokemonId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const loadingRef = useRef<boolean>(false);
+
+  const handlePokemonClick = useCallback((pokemonId: number) => {
+    setSelectedPokemonId(pokemonId);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedPokemonId(null);
+  }, []);
 
   const mapApiDataToPokemon = (apiData: any): Pokemon => {
     const stats = apiData.stats?.reduce((acc: any, stat: any) => {
@@ -286,7 +300,11 @@ export default function Pokedex() {
         {pokemons.length > 0 ? (
           <div className="pokemon-grid">
             {pokemons.map((pokemon) => (
-              <CreatureCard key={`${pokemon.id}-${pokemon.name}`} pokemon={pokemon} />
+              <CreatureCard 
+                key={`${pokemon.id}-${pokemon.name}`} 
+                pokemon={pokemon} 
+                onClick={() => handlePokemonClick(pokemon.id!)}
+              />
             ))}
           </div>
         ) : (
@@ -308,6 +326,12 @@ export default function Pokedex() {
           className="observer-element"
         />
       </div>
+
+      <CreatureModal 
+        pokemonId={selectedPokemonId}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </>
   );
 }

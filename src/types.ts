@@ -28,7 +28,6 @@ export type Pokemon = {
   id: number | null;
   name: string | null;
   types: PokemonType[];
-  skills: string[];
   evolution: string[];
   stats: Stats;
   badges: string[];

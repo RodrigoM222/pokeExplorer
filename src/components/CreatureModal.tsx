@@ -10,50 +10,55 @@ interface CreatureModalProps {
   onClose: () => void;
 }
 
+const DEFAULT_POKEMON_IMAGE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png';
+
 export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureModalProps) {
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
-  const loadPokemonDetails = useCallback(async (id: number) => {
-    setIsLoading(true);
-    setError('');
-    
-    try {
-      const data = await fetchPokemon(id.toString());
-      if (data) {
-        const details: Pokemon = {
-          id: data.id,
-          name: data.name,
-          types: data.types.map((t: any) => t.type.name),
-          skills: data.abilities?.map((a: any) => a.ability.name) || [],
-          evolution: [],
-          stats: {
-            hp: data.stats?.find((s: any) => s.stat.name === 'hp')?.base_stat || null,
-            attack: data.stats?.find((s: any) => s.stat.name === 'attack')?.base_stat || null,
-            defense: data.stats?.find((s: any) => s.stat.name === 'defense')?.base_stat || null,
-            speed: data.stats?.find((s: any) => s.stat.name === 'speed')?.base_stat || null,
-            special_attack: data.stats?.find((s: any) => s.stat.name === 'special-attack')?.base_stat || null,
-            special_defense: data.stats?.find((s: any) => s.stat.name === 'special-defense')?.base_stat || null,
-          },
-          badges: [],
-          evolutionChain: [],
-          image: data.sprites.other?.['official-artwork']?.front_default || data.sprites.front_default,
-          height: data.height ? data.height / 10 : undefined,
-          weight: data.weight ? data.weight / 10 : undefined,
-          base_experience: data.base_experience,
-          abilities: data.abilities?.map((a: any) => a.ability.name)
-        };
-        setPokemon(details);
-      } else {
-        setError('Pokémon no encontrado');
-      }
-    } catch (err) {
-      setError('No pudimos cargar los detalles. Intenta nuevamente.');
-    } finally {
-      setIsLoading(false);
+const loadPokemonDetails = useCallback(async (id: number) => {
+  setIsLoading(true);
+  setError('');
+  
+  try {
+    const data = await fetchPokemon(id.toString());
+    if (data) {
+      const details: Pokemon = {
+        id: data.id,
+        name: data.name,
+        types: data.types.map((t: any) => t.type.name),
+        evolution: [],
+        stats: {
+          hp: data.stats?.find((s: any) => s.stat.name === 'hp')?.base_stat || null,
+          attack: data.stats?.find((s: any) => s.stat.name === 'attack')?.base_stat || null,
+          defense: data.stats?.find((s: any) => s.stat.name === 'defense')?.base_stat || null,
+          speed: data.stats?.find((s: any) => s.stat.name === 'speed')?.base_stat || null,
+          special_attack: data.stats?.find((s: any) => s.stat.name === 'special-attack')?.base_stat || null,
+          special_defense: data.stats?.find((s: any) => s.stat.name === 'special-defense')?.base_stat || null,
+        },
+        badges: [],
+        evolutionChain: [],
+        image: data.sprites?.other?.['official-artwork']?.front_default || 
+               data.sprites?.front_default || 
+               DEFAULT_POKEMON_IMAGE,
+        // API returns height in decimeters; convert to meters.
+        height: data.height ? data.height / 10 : undefined,
+        // API returns weight in hectograms; convert to kilograms.
+        weight: data.weight ? data.weight / 10 : undefined,
+        base_experience: data.base_experience,
+        abilities: data.abilities?.map((a: any) => a.ability.name) || []
+      };
+      setPokemon(details);
+    } else {
+      setError('Pokémon no encontrado');
     }
-  }, []);
+  } catch (err) {
+    setError('No pudimos cargar los detalles. Intenta nuevamente.');
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
 
   useEffect(() => {
     if (isOpen && pokemonId) {
@@ -111,9 +116,12 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
 
             <div className="modal-image-container">
               <img 
-                src={pokemon.image || ''} 
+                src={pokemon.image || DEFAULT_POKEMON_IMAGE} 
                 alt={pokemon.name || 'Pokémon'} 
                 className="modal-image"
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_POKEMON_IMAGE;
+                }}
               />
             </div>
 

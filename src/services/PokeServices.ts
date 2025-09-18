@@ -25,6 +25,9 @@ export type PokemonAPIResponse = {
       name: string;
     };
   }[];
+  height?: number;
+  weight?: number;
+  base_experience?: number;
 };
 
 const BASE_URL = 'https://pokeapi.co/api/v2/pokemon';

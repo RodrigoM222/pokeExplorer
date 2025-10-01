@@ -306,6 +306,17 @@
   transform: translateY(0);
 }
 
+.ability-badge.hidden-ability {
+  background: #4B4B4B;
+  color: #FFFFFF;
+  border-color: #000000;
+}
+
+.ability-badge.hidden-ability:hover {
+  transform: translateY(-2px);
+  background: #666666;
+}
+
 @keyframes fadeIn {
   from { 
     opacity: 0;

@@ -24,6 +24,11 @@ export type Ability = {
   };
 };
 
+export type PokemonAbility = {
+  name: string;
+  isHidden: boolean;
+};
+
 export type Pokemon = {
   id: number | null;
   name: string | null;
@@ -36,7 +41,7 @@ export type Pokemon = {
   height?: number;
   weight?: number;
   base_experience?: number;
-  abilities?: string[];
+  abilities?: PokemonAbility[];
 };
 
 export type BasicPokemonInfo = {

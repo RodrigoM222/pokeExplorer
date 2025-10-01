@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Pokemon } from '../types';
+import TypeBadgeList from './TypeBadgesList';
 import TypeBadge from './TypeBadge';
 import './CreatureCard.css';
 
@@ -23,13 +24,10 @@ export default function CreatureCard({ pokemon, onClick }: CreatureCardProps) {
         <h3 className="card__name">{pokemon.name}</h3>
         
         <div className="card__types" aria-label="Pokémon types">
-          {pokemon.types.map((type, idx) => (
-            <TypeBadge 
-              key={`${pokemon.name}_${type}_${idx}`} 
-              type={type} 
-              size="small"
-            />
-          ))}
+          <TypeBadgeList
+            types={pokemon.types || []}
+            size="small"
+          />
         </div>
       </div>
     </div>

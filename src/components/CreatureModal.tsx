@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import type { Pokemon } from '../types';
+import type { Pokemon, PokemonWithAbilities } from '../types';
 import { fetchPokemon } from '../services/PokeServices';
 import TypeBadgesList from './TypeBadgesList';
 import './CreatureModal.css';
@@ -10,16 +10,8 @@ interface CreatureModalProps {
   onClose: () => void;
 }
 
-interface PokemonAbility {
-  name: string;
-  isHidden: boolean;
-}
-
-interface PokemonWithAbilities extends Pokemon {
-  abilities?: PokemonAbility[];
-}
-
-const DEFAULT_POKEMON_IMAGE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png';
+const DEFAULT_POKEMON_IMAGE =
+  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png';
 
 export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureModalProps) {
   const [pokemon, setPokemon] = useState<PokemonWithAbilities | null>(null);
@@ -48,16 +40,18 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
             special_defense: data.stats?.find((s: any) => s.stat.name === 'special-defense')?.base_stat || 0,
           },
           badges: [],
-          image: data.sprites?.other?.['official-artwork']?.front_default ||
-                 data.sprites?.front_default ||
-                 DEFAULT_POKEMON_IMAGE,
+          image:
+            data.sprites?.other?.['official-artwork']?.front_default ||
+            data.sprites?.front_default ||
+            DEFAULT_POKEMON_IMAGE,
           height: data.height ? data.height / 10 : undefined,
           weight: data.weight ? data.weight / 10 : undefined,
           base_experience: data.base_experience,
-          abilities: data.abilities?.map((a: any) => ({
-            name: a.ability.name,
-            isHidden: a.is_hidden
-          })) || []
+          abilities:
+            data.abilities?.map((a: any) => ({
+              name: a.ability.name,
+              isHidden: a.is_hidden,
+            })) || [],
         };
         setPokemon(details);
       } else {
@@ -114,7 +108,7 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose} aria-label="Cerrar modal">
-          x
+        ×
         </button>
 
         {isLoading && (

@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Pokemon } from '../types';
 import TypeBadgeList from './TypeBadgesList';
-import TypeBadge from './TypeBadge';
 import './CreatureCard.css';
 
 type CreatureCardProps = {

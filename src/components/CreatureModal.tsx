@@ -20,8 +20,7 @@ interface PokemonWithAbilities extends Pokemon {
   abilities?: PokemonAbility[];
 }
 
-const DEFAULT_POKEMON_IMAGE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png';
+const DEFAULT_POKEMON_IMAGE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png';
 
 export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureModalProps) {
   const [pokemon, setPokemon] = useState<PokemonWithAbilities | null>(null);
@@ -47,12 +46,12 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
           types: data.types.map((t: any) => t.type.name),
           evolution: [],
           evolutionChain: [],
-          stats: extractStats({
-            stats: data.stats?.map((s: any) => ({
+          stats: extractStats(
+            data.stats?.map((s: any) => ({
               name: s.stat.name,
               base_stat: s.base_stat,
             })) || [],
-          }),
+          ),
           badges: [],
           image:
             data.sprites?.other?.['official-artwork']?.front_default ||

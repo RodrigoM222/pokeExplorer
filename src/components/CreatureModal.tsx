@@ -1,13 +1,23 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import type { Pokemon, PokemonWithAbilities } from '../types';
-import { fetchPokemon } from '../services/PokeServices';
+import type { Pokemon } from '../types';
+import { fetchPokemon, fetchEvolutionChain, type EvolutionStage } from '../services/PokeServices';
 import TypeBadgesList from './TypeBadgesList';
+import { extractStats } from '../utils/pokemon';
 import './CreatureModal.css';
 
 interface CreatureModalProps {
   pokemonId: number | null;
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface PokemonAbility {
+  name: string;
+  isHidden: boolean;
+}
+
+interface PokemonWithAbilities extends Pokemon {
+  abilities?: PokemonAbility[];
 }
 
 const DEFAULT_POKEMON_IMAGE =
@@ -18,9 +28,15 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
+  const [evolutionStages, setEvolutionStages] = useState<EvolutionStage[]>([]);
+  const [isEvolutionLoading, setIsEvolutionLoading] = useState(false);
+  const [evolutionError, setEvolutionError] = useState('');
+
   const loadPokemonDetails = useCallback(async (id: number) => {
     setIsLoading(true);
     setError('');
+    setEvolutionStages([]);
+    setEvolutionError('');
 
     try {
       const data = await fetchPokemon(id.toString());
@@ -31,14 +47,12 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
           types: data.types.map((t: any) => t.type.name),
           evolution: [],
           evolutionChain: [],
-          stats: {
-            hp: data.stats?.find((s: any) => s.stat.name === 'hp')?.base_stat || 0,
-            attack: data.stats?.find((s: any) => s.stat.name === 'attack')?.base_stat || 0,
-            defense: data.stats?.find((s: any) => s.stat.name === 'defense')?.base_stat || 0,
-            speed: data.stats?.find((s: any) => s.stat.name === 'speed')?.base_stat || 0,
-            special_attack: data.stats?.find((s: any) => s.stat.name === 'special-attack')?.base_stat || 0,
-            special_defense: data.stats?.find((s: any) => s.stat.name === 'special-defense')?.base_stat || 0,
-          },
+          stats: extractStats({
+            stats: data.stats?.map((s: any) => ({
+              name: s.stat.name,
+              base_stat: s.base_stat,
+            })) || [],
+          }),
           badges: [],
           image:
             data.sprites?.other?.['official-artwork']?.front_default ||
@@ -54,6 +68,16 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
             })) || [],
         };
         setPokemon(details);
+
+        setIsEvolutionLoading(true);
+        try {
+          const evoData = await fetchEvolutionChain(data.id);
+          setEvolutionStages(evoData);
+        } catch {
+          setEvolutionError('No pudimos cargar la cadena de evolución');
+        } finally {
+          setIsEvolutionLoading(false);
+        }
       } else {
         setError('Pokémon no encontrado');
       }
@@ -106,9 +130,9 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose} aria-label="Cerrar modal">
-        ×
+          ×
         </button>
 
         {isLoading && (
@@ -137,7 +161,9 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
                 src={pokemon.image || DEFAULT_POKEMON_IMAGE}
                 alt={pokemon.name || 'Pokémon'}
                 className="modal-image"
-                onError={(e) => { e.currentTarget.src = DEFAULT_POKEMON_IMAGE; }}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_POKEMON_IMAGE;
+                }}
               />
             </div>
 
@@ -186,6 +212,36 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
                   {renderStatBar('SpD', pokemon.stats.special_defense || 0)}
                   {renderStatBar('SPD', pokemon.stats.speed || 0)}
                 </div>
+              </div>
+
+              <div className="stat-section">
+                <h3>Cadena Evolutiva</h3>
+                {isEvolutionLoading && <p>Cargando cadena evolutiva...</p>}
+                {evolutionError && <p>{evolutionError}</p>}
+                {!isEvolutionLoading && !evolutionError && (
+                  <div className="evolution-chain">
+                    {evolutionStages.length === 0 ? (
+                      <p>Este Pokémon no tiene evoluciones.</p>
+                    ) : (
+                      evolutionStages.map((stage, index) => (
+                        <div key={stage.id} className="evolution-stage">
+                          <img
+                            src={stage.image || DEFAULT_POKEMON_IMAGE}
+                            alt={stage.name}
+                            className="evolution-image"
+                            onError={(e) => {
+                              e.currentTarget.src = DEFAULT_POKEMON_IMAGE;
+                            }}
+                          />
+                          <p>{stage.name}</p>
+                          {index < evolutionStages.length - 1 && (
+                            <span className="evolution-arrow">→</span>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

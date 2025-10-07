@@ -256,7 +256,7 @@
 .loading-spinner {
   width: 60px;
   height: 60px;
-  border: 5px solid #2A75BB;
+  border: 5px solid #134370;
   border-top: 5px solid #FFDE00;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -264,7 +264,7 @@
 }
 
 .modal-loading p {
-  color: #2A75BB;
+  color: #134370;
   font-weight: 600;
   font-size: 18px;
   margin: 0;
@@ -315,6 +315,33 @@
 .ability-badge.hidden-ability:hover {
   transform: translateY(-2px);
   background: #666666;
+}
+
+.evolution-chain {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.evolution-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.evolution-image {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.evolution-name {
+  margin-top: 4px;
+  font-size: 20px;
+  text-transform: capitalize;
 }
 
 @keyframes fadeIn {

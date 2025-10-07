@@ -1,4 +1,4 @@
-export type PokemonType = 
+export type PokemonType =
   | "normal" | "fire" | "water" | "grass" | "electric"
   | "ice" | "fighting" | "poison" | "ground" | "flying"
   | "psychic" | "bug" | "rock" | "ghost" | "dragon"
@@ -18,10 +18,9 @@ export type Stats = {
   special_defense?: number | null;
 };
 
-export type Ability = {
-  ability: {
-    name: string;
-  };
+export type PokemonAbility = {
+  name: string;
+  isHidden: boolean;
 };
 
 export type Pokemon = {
@@ -36,7 +35,11 @@ export type Pokemon = {
   height?: number;
   weight?: number;
   base_experience?: number;
-  abilities?: string[];
+  abilities?: PokemonAbility[];
+};
+
+export type PokemonWithAbilities = Pokemon & {
+  abilities?: PokemonAbility[];
 };
 
 export type BasicPokemonInfo = {
@@ -44,6 +47,5 @@ export type BasicPokemonInfo = {
   id: number;
 };
 
-export const capitalizeFirst = (str: string): string => {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
+export const capitalizeFirst = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1);

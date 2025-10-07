@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import type { Pokemon } from '../types';
-import { fetchPokemon } from '../services/PokeServices';
+import { fetchPokemon, fetchEvolutionChain, type EvolutionStage } from '../services/PokeServices';
 import TypeBadgesList from './TypeBadgesList';
+import { extractStats } from '../utils/pokemon';
 import './CreatureModal.css';
 
 interface CreatureModalProps {
@@ -10,55 +11,81 @@ interface CreatureModalProps {
   onClose: () => void;
 }
 
+interface PokemonAbility {
+  name: string;
+  isHidden: boolean;
+}
+
+interface PokemonWithAbilities extends Pokemon {
+  abilities?: PokemonAbility[];
+}
+
 const DEFAULT_POKEMON_IMAGE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png';
 
 export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureModalProps) {
-  const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+  const [pokemon, setPokemon] = useState<PokemonWithAbilities | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
-const loadPokemonDetails = useCallback(async (id: number) => {
-  setIsLoading(true);
-  setError('');
-  
-  try {
-    const data = await fetchPokemon(id.toString());
-    if (data) {
-      const details: Pokemon = {
-        id: data.id,
-        name: data.name,
-        types: data.types.map((t: any) => t.type.name),
-        evolution: [],
-        stats: {
-          hp: data.stats?.find((s: any) => s.stat.name === 'hp')?.base_stat || null,
-          attack: data.stats?.find((s: any) => s.stat.name === 'attack')?.base_stat || null,
-          defense: data.stats?.find((s: any) => s.stat.name === 'defense')?.base_stat || null,
-          speed: data.stats?.find((s: any) => s.stat.name === 'speed')?.base_stat || null,
-          special_attack: data.stats?.find((s: any) => s.stat.name === 'special-attack')?.base_stat || null,
-          special_defense: data.stats?.find((s: any) => s.stat.name === 'special-defense')?.base_stat || null,
-        },
-        badges: [],
-        evolutionChain: [],
-        image: data.sprites?.other?.['official-artwork']?.front_default || 
-               data.sprites?.front_default || 
-               DEFAULT_POKEMON_IMAGE,
-        // API returns height in decimeters; convert to meters.
-        height: data.height ? data.height / 10 : undefined,
-        // API returns weight in hectograms; convert to kilograms.
-        weight: data.weight ? data.weight / 10 : undefined,
-        base_experience: data.base_experience,
-        abilities: data.abilities?.map((a: any) => a.ability.name) || []
-      };
-      setPokemon(details);
-    } else {
-      setError('Pokémon no encontrado');
+  const [evolutionStages, setEvolutionStages] = useState<EvolutionStage[]>([]);
+  const [isEvolutionLoading, setIsEvolutionLoading] = useState(false);
+  const [evolutionError, setEvolutionError] = useState('');
+
+  const loadPokemonDetails = useCallback(async (id: number) => {
+    setIsLoading(true);
+    setError('');
+    setEvolutionStages([]);
+    setEvolutionError('');
+
+    try {
+      const data = await fetchPokemon(id.toString());
+      if (data) {
+        const details: PokemonWithAbilities = {
+          id: data.id,
+          name: data.name,
+          types: data.types.map((t: any) => t.type.name),
+          evolution: [],
+          evolutionChain: [],
+          stats: extractStats(
+            data.stats?.map((s: any) => ({
+              name: s.stat.name,
+              base_stat: s.base_stat,
+            })) || [],
+          ),
+          badges: [],
+          image:
+            data.sprites?.other?.['official-artwork']?.front_default ||
+            data.sprites?.front_default ||
+            DEFAULT_POKEMON_IMAGE,
+          height: data.height ? data.height / 10 : undefined,
+          weight: data.weight ? data.weight / 10 : undefined,
+          base_experience: data.base_experience,
+          abilities:
+            data.abilities?.map((a: any) => ({
+              name: a.ability.name,
+              isHidden: a.is_hidden,
+            })) || [],
+        };
+        setPokemon(details);
+
+        setIsEvolutionLoading(true);
+        try {
+          const evoData = await fetchEvolutionChain(data.id);
+          setEvolutionStages(evoData);
+        } catch {
+          setEvolutionError('No pudimos cargar la cadena de evolución');
+        } finally {
+          setIsEvolutionLoading(false);
+        }
+      } else {
+        setError('Pokémon no encontrado');
+      }
+    } catch (err) {
+      setError('No pudimos cargar los detalles. Intenta nuevamente.');
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err) {
-    setError('No pudimos cargar los detalles. Intenta nuevamente.');
-  } finally {
-    setIsLoading(false);
-  }
-}, []);
+  }, []);
 
   useEffect(() => {
     if (isOpen && pokemonId) {
@@ -84,9 +111,25 @@ const loadPokemonDetails = useCallback(async (id: number) => {
 
   if (!isOpen) return null;
 
+  const renderStatBar = (label: string, value: number) => (
+    <div className="stat">
+      <span>{label}</span>
+      <div
+        className="stat-bar"
+        aria-valuenow={value}
+        aria-valuemin={0}
+        aria-valuemax={255}
+        role="progressbar"
+      >
+        <div className="bar-fill" style={{ width: `${(value / 255) * 100}%` }} />
+      </div>
+      <strong>{value}</strong>
+    </div>
+  );
+
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose} aria-label="Cerrar modal">
           ×
         </button>
@@ -101,9 +144,7 @@ const loadPokemonDetails = useCallback(async (id: number) => {
         {error && (
           <div className="modal-error">
             <p>{error}</p>
-            <button onClick={() => pokemonId && loadPokemonDetails(pokemonId)}>
-              Reintentar
-            </button>
+            <button onClick={() => pokemonId && loadPokemonDetails(pokemonId)}>Reintentar</button>
           </div>
         )}
 
@@ -115,9 +156,9 @@ const loadPokemonDetails = useCallback(async (id: number) => {
             </div>
 
             <div className="modal-image-container">
-              <img 
-                src={pokemon.image || DEFAULT_POKEMON_IMAGE} 
-                alt={pokemon.name || 'Pokémon'} 
+              <img
+                src={pokemon.image || DEFAULT_POKEMON_IMAGE}
+                alt={pokemon.name || 'Pokémon'}
                 className="modal-image"
                 onError={(e) => {
                   e.currentTarget.src = DEFAULT_POKEMON_IMAGE;
@@ -149,8 +190,12 @@ const loadPokemonDetails = useCallback(async (id: number) => {
                 <h3>Habilidades</h3>
                 <div className="abilities">
                   {pokemon.abilities?.map((ability, index) => (
-                    <span key={index} className="ability-badge">
-                      {ability}
+                    <span
+                      key={index}
+                      className={`ability-badge ${ability.isHidden ? 'hidden-ability' : ''}`}
+                      title={ability.isHidden ? 'Habilidad oculta' : ''}
+                    >
+                      {ability.name}
                     </span>
                   ))}
                 </div>
@@ -159,31 +204,43 @@ const loadPokemonDetails = useCallback(async (id: number) => {
               <div className="stat-section">
                 <h3>Estadísticas Base</h3>
                 <div className="stats-grid">
-                  <div className="stat">
-                    <span>HP</span>
-                    <strong>{pokemon.stats.hp || 0}</strong>
-                  </div>
-                  <div className="stat">
-                    <span>ATK</span>
-                    <strong>{pokemon.stats.attack || 0}</strong>
-                  </div>
-                  <div className="stat">
-                    <span>DEF</span>
-                    <strong>{pokemon.stats.defense || 0}</strong>
-                  </div>
-                  <div className="stat">
-                    <span>SpA</span>
-                    <strong>{pokemon.stats.special_attack || 0}</strong>
-                  </div>
-                  <div className="stat">
-                    <span>SpD</span>
-                    <strong>{pokemon.stats.special_defense || 0}</strong>
-                  </div>
-                  <div className="stat">
-                    <span>SPD</span>
-                    <strong>{pokemon.stats.speed || 0}</strong>
-                  </div>
+                  {renderStatBar('HP', pokemon.stats.hp || 0)}
+                  {renderStatBar('ATK', pokemon.stats.attack || 0)}
+                  {renderStatBar('DEF', pokemon.stats.defense || 0)}
+                  {renderStatBar('SpA', pokemon.stats.special_attack || 0)}
+                  {renderStatBar('SpD', pokemon.stats.special_defense || 0)}
+                  {renderStatBar('SPD', pokemon.stats.speed || 0)}
                 </div>
+              </div>
+
+              <div className="stat-section">
+                <h3>Cadena Evolutiva</h3>
+                {isEvolutionLoading && <p>Cargando cadena evolutiva...</p>}
+                {evolutionError && <p>{evolutionError}</p>}
+                {!isEvolutionLoading && !evolutionError && (
+                  <div className="evolution-chain">
+                    {evolutionStages.length === 0 ? (
+                      <p>Este Pokémon no tiene evoluciones.</p>
+                    ) : (
+                      evolutionStages.map((stage, index) => (
+                        <div key={stage.id} className="evolution-stage">
+                          <img
+                            src={stage.image || DEFAULT_POKEMON_IMAGE}
+                            alt={stage.name}
+                            className="evolution-image"
+                            onError={(e) => {
+                              e.currentTarget.src = DEFAULT_POKEMON_IMAGE;
+                            }}
+                          />
+                          <p>{stage.name}</p>
+                          {index < evolutionStages.length - 1 && (
+                            <span className="evolution-arrow">→</span>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

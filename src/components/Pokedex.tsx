@@ -60,17 +60,17 @@ export default function Pokedex() {
       if (stat.stat.name === 'speed') acc.speed = stat.base_stat;
       return acc;
     }, { hp: 0, attack: 0, defense: 0, speed: 0 }) || { hp: 0, attack: 0, defense: 0, speed: 0 };
-
+  
     return {
       id: apiData.id,
       name: apiData.name,
       types: apiData.types.map((t: any) => {
         const typeName = t.type.name.toLowerCase();
         return validPokemonTypes.includes(typeName as PokemonType)
-          ? typeName as PokemonType
+          ? (typeName as PokemonType)
           : 'normal';
       }),
-      skills: apiData.abilities?.map((a: any) => a.ability.name) || [],
+      abilities: apiData.abilities?.map((a: any) => a.ability.name) || [],
       evolution: [],
       stats,
       badges: [],
@@ -78,7 +78,7 @@ export default function Pokedex() {
       image:
         apiData.sprites.other?.['official-artwork']?.front_default ||
         apiData.sprites.front_default ||
-        null
+        null,
     };
   };
 

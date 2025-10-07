@@ -108,3 +108,48 @@ export async function searchPokemonAdvanced(
     return { results: [], total: 0 };
   }
 }
+
+export type EvolutionStage = {
+  id: number;
+  name: string;
+  image: string | null;
+};
+
+export async function fetchEvolutionChain(pokemonId: number): Promise<EvolutionStage[]> {
+  try {
+    const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}/`);
+    if (!speciesRes.ok) throw new Error('Error al obtener species');
+    const speciesData = await speciesRes.json();
+
+    const evoUrl: string = speciesData.evolution_chain?.url;
+    if (!evoUrl) return [];
+
+    const evoRes = await fetch(evoUrl);
+    if (!evoRes.ok) throw new Error('Error al obtener cadena de evolución');
+    const evoData = await evoRes.json();
+
+    const stages: EvolutionStage[] = [];
+    const traverseChain = (node: any) => {
+      if (!node) return;
+
+      const match = node.species.url.match(/\/pokemon-species\/(\d+)\//);
+      const id = match ? parseInt(match[1], 10) : 0;
+
+      stages.push({
+        id,
+        name: node.species.name,
+        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+      });
+
+      if (node.evolves_to && node.evolves_to.length > 0) {
+        node.evolves_to.forEach((child: any) => traverseChain(child));
+      }
+    };
+
+    traverseChain(evoData.chain);
+    return stages;
+  } catch (err) {
+    console.error('Error obteniendo cadena de evolución:', err);
+    return [];
+  }
+}

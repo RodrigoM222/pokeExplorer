@@ -10,6 +10,8 @@ import {
   MIN_ID 
 } from '../services/PokeServices';
 import type { Pokemon, PokemonType } from '../types';
+import { useLoading } from '../context/LoadingContext';
+import LoadingIndicator from './LoadingIndicator';
 import './Pokedex.css';
 
 const PAGE_SIZE = 20;
@@ -41,6 +43,8 @@ export default function Pokedex() {
   const observer = useRef<IntersectionObserver | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const loadingRef = useRef<boolean>(false);
+
+  const { withLoading } = useLoading();
 
   const handlePokemonClick = useCallback((pokemonId: number) => {
     setSelectedPokemonId(pokemonId);
@@ -98,19 +102,22 @@ export default function Pokedex() {
 
   const loadPokemons = useCallback(async (currentOffset: number) => {
     if (loadingRef.current || !hasMore || query.trim() !== '') return;
-
+  
     loadingRef.current = true;
     setIsLoading(true);
     setSearchError('');
     
     try {
-      const list = await fetchPokemonList(currentOffset, PAGE_SIZE);
-
+      const list = await withLoading(
+        fetchPokemonList(currentOffset, PAGE_SIZE),
+        'pokemon-list'
+      );
+  
       if (list.length === 0) {
         setHasMore(false);
         return;
       }
-
+  
       const data = await Promise.all(
         list.map(async (p) => {
           try {
@@ -122,7 +129,7 @@ export default function Pokedex() {
           }
         })
       );
-
+  
       const validPokemons = data.filter((p): p is Pokemon => p !== null);
       
       setPokemons((prev) => {
@@ -130,7 +137,7 @@ export default function Pokedex() {
         const newPokemons = validPokemons.filter(p => !existingIds.has(p.id));
         return [...prev, ...newPokemons];
       });
-
+  
       setOffset(currentOffset + PAGE_SIZE);
       
     } catch (error) {
@@ -140,7 +147,7 @@ export default function Pokedex() {
       setIsLoading(false);
       loadingRef.current = false;
     }
-  }, [hasMore, query]);
+  }, [hasMore, query, withLoading]);
 
   const handleSearch = useCallback(async (value: string) => {
     const trimmed = value.trim();
@@ -182,7 +189,10 @@ export default function Pokedex() {
       }
 
       try {
-        const result = await fetchPokemon(String(id));
+        const result = await withLoading(
+          fetchPokemon(String(id)),
+          `search-${id}`
+        );
         if (result) {
           setPokemons([mapApiDataToPokemon(result)]);
         } else {
@@ -200,15 +210,18 @@ export default function Pokedex() {
     if (inputType === 'text') {
       try {
         const lowercaseQuery = trimmed.toLowerCase();
-        const searchResults = await searchPokemonByName(lowercaseQuery);
-
+        const searchResults = await withLoading(
+          searchPokemonByName(lowercaseQuery),
+          `search-${lowercaseQuery}`
+        );
+    
         if (searchResults.length === 0) {
           setSearchError('No se encontraron Pokémon con ese nombre');
           setPokemons([]);
           setIsLoading(false);
           return;
         }
-
+    
         const dataWithDetails = await Promise.all(
           searchResults.slice(0, 30).map(async (p) => {
             try {
@@ -220,7 +233,7 @@ export default function Pokedex() {
             }
           })
         );
-
+    
         const validResults = dataWithDetails.filter((p): p is Pokemon => p !== null);
         setPokemons(validResults);
         
@@ -236,7 +249,7 @@ export default function Pokedex() {
       setIsLoading(false);
       return;
     }
-  }, []);
+  }, [withLoading]);
 
   useEffect(() => {
     if (!bottomRef.current || query.trim() !== '' || !hasMore || isLoading) return;
@@ -315,9 +328,13 @@ export default function Pokedex() {
           )
         )}
         
-        {isLoading && (
+        {isLoading && ( 
           <div className="message-container">
-            <p className="loading">Cargando...</p>
+            <LoadingIndicator 
+              type="dots" 
+              size="large" 
+              message={query ? "Buscando..." : "Cargando Pokémon..."} 
+            />
           </div>
         )}
         

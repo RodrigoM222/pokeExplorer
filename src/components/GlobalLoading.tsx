@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLoading } from './LoadingContext';
+import { useLoading } from '../context/LoadingContext';
 import LoadingIndicator from './LoadingIndicator';
 
 export default function GlobalLoading() {

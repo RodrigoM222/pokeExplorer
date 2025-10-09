@@ -10,7 +10,7 @@ import {
   MIN_ID 
 } from '../services/PokeServices';
 import type { Pokemon, PokemonType } from '../types';
-import { useLoading } from './LoadingContext';
+import { useLoading } from '../context/LoadingContext';
 import LoadingIndicator from './LoadingIndicator';
 import './Pokedex.css';
 

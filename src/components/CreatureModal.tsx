@@ -3,7 +3,7 @@ import type { Pokemon } from '../types';
 import { fetchPokemon, fetchEvolutionChain, type EvolutionStage } from '../services/PokeServices';
 import TypeBadgesList from './TypeBadgesList';
 import { extractStats } from '../utils/pokemon';
-import { useLoading } from './LoadingContext';
+import { useLoading } from '../context/LoadingContext';
 import LoadingIndicator from './LoadingIndicator';
 import './CreatureModal.css';
 

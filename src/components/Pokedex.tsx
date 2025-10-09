@@ -10,6 +10,8 @@ import {
   MIN_ID 
 } from '../services/PokeServices';
 import type { Pokemon, PokemonType } from '../types';
+import { useLoading } from './LoadingContext';
+import LoadingIndicator from './LoadingIndicator';
 import './Pokedex.css';
 
 const PAGE_SIZE = 20;
@@ -41,6 +43,8 @@ export default function Pokedex() {
   const observer = useRef<IntersectionObserver | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const loadingRef = useRef<boolean>(false);
+
+  const { withLoading } = useLoading();
 
   const handlePokemonClick = useCallback((pokemonId: number) => {
     setSelectedPokemonId(pokemonId);
@@ -104,7 +108,10 @@ export default function Pokedex() {
     setSearchError('');
     
     try {
-      const list = await fetchPokemonList(currentOffset, PAGE_SIZE);
+      const list = await withLoading(
+        fetchPokemonList(currentOffset, PAGE_SIZE),
+        'pokemon-list'
+      );
 
       if (list.length === 0) {
         setHasMore(false);
@@ -114,7 +121,10 @@ export default function Pokedex() {
       const data = await Promise.all(
         list.map(async (p) => {
           try {
-            const apiData = await fetchPokemon(p.name);
+            const apiData = await withLoading(
+              fetchPokemon(p.name),
+              `pokemon-${p.name}`
+            );
             return apiData ? mapApiDataToPokemon(apiData) : null;
           } catch (error) {
             console.error(`Error fetching ${p.name}:`, error);
@@ -140,7 +150,7 @@ export default function Pokedex() {
       setIsLoading(false);
       loadingRef.current = false;
     }
-  }, [hasMore, query]);
+  }, [hasMore, query, withLoading]);
 
   const handleSearch = useCallback(async (value: string) => {
     const trimmed = value.trim();
@@ -182,7 +192,10 @@ export default function Pokedex() {
       }
 
       try {
-        const result = await fetchPokemon(String(id));
+        const result = await withLoading(
+          fetchPokemon(String(id)),
+          `search-${id}`
+        );
         if (result) {
           setPokemons([mapApiDataToPokemon(result)]);
         } else {
@@ -200,7 +213,10 @@ export default function Pokedex() {
     if (inputType === 'text') {
       try {
         const lowercaseQuery = trimmed.toLowerCase();
-        const searchResults = await searchPokemonByName(lowercaseQuery);
+        const searchResults = await withLoading(
+          searchPokemonByName(lowercaseQuery),
+          `search-${lowercaseQuery}`
+        );
 
         if (searchResults.length === 0) {
           setSearchError('No se encontraron Pokémon con ese nombre');
@@ -212,7 +228,10 @@ export default function Pokedex() {
         const dataWithDetails = await Promise.all(
           searchResults.slice(0, 30).map(async (p) => {
             try {
-              const apiData = await fetchPokemon(p.name);
+              const apiData = await withLoading(
+                fetchPokemon(p.name),
+                `pokemon-${p.name}`
+              );
               return apiData ? mapApiDataToPokemon(apiData) : null;
             } catch (error) {
               console.error(`Error fetching details for ${p.name}:`, error);
@@ -236,7 +255,7 @@ export default function Pokedex() {
       setIsLoading(false);
       return;
     }
-  }, []);
+  }, [withLoading]);
 
   useEffect(() => {
     if (!bottomRef.current || query.trim() !== '' || !hasMore || isLoading) return;
@@ -315,9 +334,13 @@ export default function Pokedex() {
           )
         )}
         
-        {isLoading && (
+        {isLoading && ( 
           <div className="message-container">
-            <p className="loading">Cargando...</p>
+            <LoadingIndicator 
+              type="dots" 
+              size="large" 
+              message={query ? "Buscando..." : "Cargando Pokémon..."} 
+            />
           </div>
         )}
         

@@ -67,10 +67,13 @@ const initialState: LoadingState = {
 };
 
 const withMinimumDelay = async <T,>(promise: Promise<T>, minDelay: number = 500): Promise<T> => {
-  const [result] = await Promise.all([
-    promise,
-    new Promise(resolve => setTimeout(resolve, minDelay))
-  ]);
+  const start = Date.now();
+  const result = await promise;
+  const elapsed = Date.now() - start;
+  
+  if (elapsed < minDelay) {
+    await new Promise(resolve => setTimeout(resolve, minDelay - elapsed));
+  }
   
   return result;
 };

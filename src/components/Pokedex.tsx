@@ -102,7 +102,7 @@ export default function Pokedex() {
 
   const loadPokemons = useCallback(async (currentOffset: number) => {
     if (loadingRef.current || !hasMore || query.trim() !== '') return;
-
+  
     loadingRef.current = true;
     setIsLoading(true);
     setSearchError('');
@@ -112,19 +112,16 @@ export default function Pokedex() {
         fetchPokemonList(currentOffset, PAGE_SIZE),
         'pokemon-list'
       );
-
+  
       if (list.length === 0) {
         setHasMore(false);
         return;
       }
-
+  
       const data = await Promise.all(
         list.map(async (p) => {
           try {
-            const apiData = await withLoading(
-              fetchPokemon(p.name),
-              `pokemon-${p.name}`
-            );
+            const apiData = await fetchPokemon(p.name);
             return apiData ? mapApiDataToPokemon(apiData) : null;
           } catch (error) {
             console.error(`Error fetching ${p.name}:`, error);
@@ -132,7 +129,7 @@ export default function Pokedex() {
           }
         })
       );
-
+  
       const validPokemons = data.filter((p): p is Pokemon => p !== null);
       
       setPokemons((prev) => {
@@ -140,7 +137,7 @@ export default function Pokedex() {
         const newPokemons = validPokemons.filter(p => !existingIds.has(p.id));
         return [...prev, ...newPokemons];
       });
-
+  
       setOffset(currentOffset + PAGE_SIZE);
       
     } catch (error) {
@@ -217,21 +214,18 @@ export default function Pokedex() {
           searchPokemonByName(lowercaseQuery),
           `search-${lowercaseQuery}`
         );
-
+    
         if (searchResults.length === 0) {
           setSearchError('No se encontraron Pokémon con ese nombre');
           setPokemons([]);
           setIsLoading(false);
           return;
         }
-
+    
         const dataWithDetails = await Promise.all(
           searchResults.slice(0, 30).map(async (p) => {
             try {
-              const apiData = await withLoading(
-                fetchPokemon(p.name),
-                `pokemon-${p.name}`
-              );
+              const apiData = await fetchPokemon(p.name);
               return apiData ? mapApiDataToPokemon(apiData) : null;
             } catch (error) {
               console.error(`Error fetching details for ${p.name}:`, error);
@@ -239,7 +233,7 @@ export default function Pokedex() {
             }
           })
         );
-
+    
         const validResults = dataWithDetails.filter((p): p is Pokemon => p !== null);
         setPokemons(validResults);
         

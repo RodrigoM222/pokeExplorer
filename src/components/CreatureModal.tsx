@@ -3,6 +3,8 @@ import type { Pokemon } from '../types';
 import { fetchPokemon, fetchEvolutionChain, type EvolutionStage } from '../services/PokeServices';
 import TypeBadgesList from './TypeBadgesList';
 import { extractStats } from '../utils/pokemon';
+import { useLoading } from '../context/LoadingContext';
+import LoadingIndicator from './LoadingIndicator';
 import './CreatureModal.css';
 
 interface CreatureModalProps {
@@ -24,21 +26,21 @@ const DEFAULT_POKEMON_IMAGE = 'https://raw.githubusercontent.com/PokeAPI/sprites
 
 export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureModalProps) {
   const [pokemon, setPokemon] = useState<PokemonWithAbilities | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
-
   const [evolutionStages, setEvolutionStages] = useState<EvolutionStage[]>([]);
-  const [isEvolutionLoading, setIsEvolutionLoading] = useState(false);
   const [evolutionError, setEvolutionError] = useState('');
+  const [isEvolutionLoading, setIsEvolutionLoading] = useState(false);
+
+  const { withLoading } = useLoading();
 
   const loadPokemonDetails = useCallback(async (id: number) => {
-    setIsLoading(true);
     setError('');
     setEvolutionStages([]);
     setEvolutionError('');
 
     try {
-      const data = await fetchPokemon(id.toString());
+      const data = await withLoading(fetchPokemon(id.toString()), `pokemon-${id}`);
+      
       if (data) {
         const details: PokemonWithAbilities = {
           id: data.id,
@@ -70,7 +72,7 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
 
         setIsEvolutionLoading(true);
         try {
-          const evoData = await fetchEvolutionChain(data.id);
+          const evoData = await withLoading(fetchEvolutionChain(data.id), `evolution-${data.id}`);
           setEvolutionStages(evoData);
         } catch {
           setEvolutionError('No pudimos cargar la cadena de evolución');
@@ -82,10 +84,8 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
       }
     } catch (err) {
       setError('No pudimos cargar los detalles. Intenta nuevamente.');
-    } finally {
-      setIsLoading(false);
     }
-  }, []);
+  }, [withLoading]);
 
   useEffect(() => {
     if (isOpen && pokemonId) {
@@ -134,10 +134,13 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
           ×
         </button>
 
-        {isLoading && (
+        {!pokemon && !error && (
           <div className="modal-loading">
-            <div className="loading-spinner"></div>
-            <p>Cargando detalles...</p>
+            <LoadingIndicator 
+              type="spinner" 
+              size="large" 
+              message="Cargando detalles..." 
+            />
           </div>
         )}
 
@@ -148,7 +151,7 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
           </div>
         )}
 
-        {pokemon && !isLoading && !error && (
+        {pokemon && !error && (
           <div className="modal-body">
             <div className="modal-header">
               <span className="modal-id">#{pokemon.id?.toString().padStart(3, '0')}</span>
@@ -215,7 +218,13 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
 
               <div className="stat-section">
                 <h3>Cadena Evolutiva</h3>
-                {isEvolutionLoading && <p>Cargando cadena evolutiva...</p>}
+                {isEvolutionLoading && (
+                  <LoadingIndicator 
+                    type="dots" 
+                    size="small" 
+                    message="Cargando evolución..." 
+                  />
+                )}
                 {evolutionError && <p>{evolutionError}</p>}
                 {!isEvolutionLoading && !evolutionError && (
                   <div className="evolution-chain">

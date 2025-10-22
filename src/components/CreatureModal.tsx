@@ -155,7 +155,7 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
         )}
 
         {pokemon && !error && (
-          <>
+          <div className="modal-body">
             <div className="modal-header">
               <div className="modal-header__left">
                 <span className="modal-id">#{pokemon.id?.toString().padStart(3, '0')}</span>
@@ -163,118 +163,115 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
               </div>
             </div>
 
-            <div className="modal-body">
-              <div className="modal-image-container">
-                <img
-                  src={pokemon.image || DEFAULT_POKEMON_IMAGE}
-                  alt={pokemon.name || 'Pokémon'}
-                  className="modal-image"
-                  onError={(e) => {
-                    e.currentTarget.src = DEFAULT_POKEMON_IMAGE;
-                  }}
+            <div className="modal-image-container">
+              <img
+                src={pokemon.image || DEFAULT_POKEMON_IMAGE}
+                alt={pokemon.name || 'Pokémon'}
+                className="modal-image"
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_POKEMON_IMAGE;
+                }}
+              />
+            </div>
+
+            <div className="types-favorite-container">
+              <div className="modal-types">
+                <TypeBadgesList types={pokemon.types} size="medium" />
+              </div>
+              <div className="favorite-section">
+                <FavoriteButton
+                  pokemonId={pokemon.id!}
+                  isFavorite={isFavorite(pokemon.id!)}
+                  onToggle={toggleFavorite}
+                  size="large"
+                  className="modal-favorite-types"
                 />
-              </div>
-
-              {/* CONTENEDOR TIPOS + FAVORITOS */}
-              <div className="types-favorite-container">
-                <div className="modal-types">
-                  <TypeBadgesList types={pokemon.types} size="medium" />
-                </div>
-                <div className="favorite-section">
-                  <FavoriteButton
-                    pokemonId={pokemon.id!}
-                    isFavorite={isFavorite(pokemon.id!)}
-                    onToggle={toggleFavorite}
-                    size="large"
-                    className="modal-favorite-types"
-                  />
-                  <span className="favorite-label">
-                    {isFavorite(pokemon.id!) ? 'Favorito' : 'Marcar como favorito'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="modal-stats">
-                <div className="stat-row">
-                  <div className="stat-item">
-                    <span className="stat-label">Altura</span>
-                    <span className="stat-value">{pokemon.height ? `${pokemon.height}m` : 'N/A'}</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Peso</span>
-                    <span className="stat-value">{pokemon.weight ? `${pokemon.weight}kg` : 'N/A'}</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Experiencia</span>
-                    <span className="stat-value">{pokemon.base_experience || 'N/A'}</span>
-                  </div>
-                </div>
-
-                <div className="stat-section">
-                  <h3>Habilidades</h3>
-                  <div className="abilities">
-                    {pokemon.abilities?.map((ability, index) => (
-                      <span
-                        key={index}
-                        className={`ability-badge ${ability.isHidden ? 'hidden-ability' : ''}`}
-                        title={ability.isHidden ? 'Habilidad oculta' : ''}
-                      >
-                        {ability.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="stat-section">
-                  <h3>Estadísticas Base</h3>
-                  <div className="stats-grid">
-                    {renderStatBar('HP', pokemon.stats.hp || 0)}
-                    {renderStatBar('ATK', pokemon.stats.attack || 0)}
-                    {renderStatBar('DEF', pokemon.stats.defense || 0)}
-                    {renderStatBar('SpA', pokemon.stats.special_attack || 0)}
-                    {renderStatBar('SpD', pokemon.stats.special_defense || 0)}
-                    {renderStatBar('SPD', pokemon.stats.speed || 0)}
-                  </div>
-                </div>
-
-                <div className="stat-section">
-                  <h3>Cadena Evolutiva</h3>
-                  {isEvolutionLoading && (
-                    <LoadingIndicator 
-                      type="dots" 
-                      size="small" 
-                      message="Cargando evolución..." 
-                    />
-                  )}
-                  {evolutionError && <p>{evolutionError}</p>}
-                  {!isEvolutionLoading && !evolutionError && (
-                    <div className="evolution-chain">
-                      {evolutionStages.length === 0 ? (
-                        <p>Este Pokémon no tiene evoluciones.</p>
-                      ) : (
-                        evolutionStages.map((stage, index) => (
-                          <div key={stage.id} className="evolution-stage">
-                            <img
-                              src={stage.image || DEFAULT_POKEMON_IMAGE}
-                              alt={stage.name}
-                              className="evolution-image"
-                              onError={(e) => {
-                                e.currentTarget.src = DEFAULT_POKEMON_IMAGE;
-                              }}
-                            />
-                            <p>{stage.name}</p>
-                            {index < evolutionStages.length - 1 && (
-                              <span className="evolution-arrow">→</span>
-                            )}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
+                <span className="favorite-label">
+                  {isFavorite(pokemon.id!) ? 'Favorito' : 'Marcar como favorito'}
+                </span>
               </div>
             </div>
-          </>
+
+            <div className="modal-stats">
+              <div className="stat-row">
+                <div className="stat-item">
+                  <span className="stat-label">Altura</span>
+                  <span className="stat-value">{pokemon.height ? `${pokemon.height}m` : 'N/A'}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Peso</span>
+                  <span className="stat-value">{pokemon.weight ? `${pokemon.weight}kg` : 'N/A'}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Experiencia</span>
+                  <span className="stat-value">{pokemon.base_experience || 'N/A'}</span>
+                </div>
+              </div>
+
+              <div className="stat-section">
+                <h3>Habilidades</h3>
+                <div className="abilities">
+                  {pokemon.abilities?.map((ability, index) => (
+                    <span
+                      key={index}
+                      className={`ability-badge ${ability.isHidden ? 'hidden-ability' : ''}`}
+                      title={ability.isHidden ? 'Habilidad oculta' : ''}
+                    >
+                      {ability.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="stat-section">
+                <h3>Estadísticas Base</h3>
+                <div className="stats-grid">
+                  {renderStatBar('HP', pokemon.stats.hp || 0)}
+                  {renderStatBar('ATK', pokemon.stats.attack || 0)}
+                  {renderStatBar('DEF', pokemon.stats.defense || 0)}
+                  {renderStatBar('SpA', pokemon.stats.special_attack || 0)}
+                  {renderStatBar('SpD', pokemon.stats.special_defense || 0)}
+                  {renderStatBar('SPD', pokemon.stats.speed || 0)}
+                </div>
+              </div>
+
+              <div className="stat-section">
+                <h3>Cadena Evolutiva</h3>
+                {isEvolutionLoading && (
+                  <LoadingIndicator 
+                    type="dots" 
+                    size="small" 
+                    message="Cargando evolución..." 
+                  />
+                )}
+                {evolutionError && <p>{evolutionError}</p>}
+                {!isEvolutionLoading && !evolutionError && (
+                  <div className="evolution-chain">
+                    {evolutionStages.length === 0 ? (
+                      <p>Este Pokémon no tiene evoluciones.</p>
+                    ) : (
+                      evolutionStages.map((stage, index) => (
+                        <div key={stage.id} className="evolution-stage">
+                          <img
+                            src={stage.image || DEFAULT_POKEMON_IMAGE}
+                            alt={stage.name}
+                            className="evolution-image"
+                            onError={(e) => {
+                              e.currentTarget.src = DEFAULT_POKEMON_IMAGE;
+                            }}
+                          />
+                          <p>{stage.name}</p>
+                          {index < evolutionStages.length - 1 && (
+                            <span className="evolution-arrow">→</span>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

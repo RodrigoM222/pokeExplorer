@@ -29,6 +29,7 @@
   color: #f59e0b;
   background: #fff7ed;
   border-color: #f59e0b;
+  animation: starPulse 0.4s ease-in-out;
 }
 
 .favorite-button--small {
@@ -44,10 +45,6 @@
 .favorite-button--large {
   width: 60px;
   height: 60px;
-}
-
-.favorite-button--active {
-  animation: starPulse 0.4s ease-in-out;
 }
 
 @keyframes starPulse {

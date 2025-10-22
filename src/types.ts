@@ -50,7 +50,7 @@ export type BasicPokemonInfo = {
 export const capitalizeFirst = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1);
 
-export interface FavoriteContextType {
+export interface FavoritesContextType {
   favorites: number[];
   isFavorite: (pokemonId: number) => boolean;
   addFavorite: (pokemonId: number) => void;

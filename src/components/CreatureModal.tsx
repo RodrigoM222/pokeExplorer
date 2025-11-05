@@ -3,8 +3,10 @@ import type { Pokemon } from '../types';
 import { fetchPokemon, fetchEvolutionChain, type EvolutionStage } from '../services/PokeServices';
 import TypeBadgesList from './TypeBadgesList';
 import { extractStats } from '../utils/pokemon';
-import { useLoading } from '../context/LoadingContext';
+import { useLoading } from '../contexts/LoadingContext';
 import LoadingIndicator from './LoadingIndicator';
+import FavoriteButton from './FavoriteButton';
+import { useFavorites } from '../contexts/FavoritesContext';
 import './CreatureModal.css';
 
 interface CreatureModalProps {
@@ -32,6 +34,7 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
   const [isEvolutionLoading, setIsEvolutionLoading] = useState(false);
 
   const { withLoading } = useLoading();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const loadPokemonDetails = useCallback(async (id: number) => {
     setError('');
@@ -154,8 +157,10 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
         {pokemon && !error && (
           <div className="modal-body">
             <div className="modal-header">
-              <span className="modal-id">#{pokemon.id?.toString().padStart(3, '0')}</span>
-              <h2 className="modal-name">{pokemon.name}</h2>
+              <div className="modal-header__left">
+                <span className="modal-id">#{pokemon.id?.toString().padStart(3, '0')}</span>
+                <h2 className="modal-name">{pokemon.name}</h2>
+              </div>
             </div>
 
             <div className="modal-image-container">
@@ -169,8 +174,22 @@ export default function CreatureModal({ pokemonId, isOpen, onClose }: CreatureMo
               />
             </div>
 
-            <div className="modal-types">
-              <TypeBadgesList types={pokemon.types} size="medium" />
+            <div className="types-favorite-container">
+              <div className="modal-types">
+                <TypeBadgesList types={pokemon.types} size="medium" />
+              </div>
+              <div className="favorite-section">
+                <FavoriteButton
+                  pokemonId={pokemon.id!}
+                  isFavorite={isFavorite(pokemon.id!)}
+                  onToggle={toggleFavorite}
+                  size="large"
+                  className="modal-favorite-types"
+                />
+                <span className="favorite-label">
+                  {isFavorite(pokemon.id!) ? 'Favorito' : 'Marcar como favorito'}
+                </span>
+              </div>
             </div>
 
             <div className="modal-stats">

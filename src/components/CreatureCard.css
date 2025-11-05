@@ -8,11 +8,17 @@
   border: #000 solid 3px;
   padding: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .card:hover {
   transform: scale(1.05);
   transition: transform 0.3s ease-in-out;
+}
+
+.card__image-container {
+  position: relative;
+  width: 100%;
 }
 
 .card__image {
@@ -31,6 +37,13 @@
 .card__image:hover {
   transform: scale(0.9);
   transition: transform 0.3s ease-in-out;
+}
+
+.card__favorite {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
 }
 
 .card__content {

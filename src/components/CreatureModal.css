@@ -62,7 +62,10 @@
 }
 
 .modal-header {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
   margin-bottom: 25px;
   background: #2A75BB;
   border: 4px solid #000000;
@@ -70,6 +73,11 @@
   padding: 20px;
   margin: -20px -20px 25px -20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  gap: 16px;
+}
+
+.modal-header__left {
+  flex: 1;
 }
 
 .modal-id {
@@ -90,6 +98,11 @@
   font-weight: 800;
   text-shadow: 3px 3px 0 #000000;
   letter-spacing: 1px;
+}
+
+.modal-favorite {
+  flex-shrink: 0;
+  margin-top: 4px;
 }
 
 .modal-image-container {
@@ -114,12 +127,56 @@
   transform: scale(1.05);
 }
 
-.modal-types {
+.types-favorite-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 25px 0;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid #000000;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.types-favorite-container .modal-types {
+  margin: 0;
+  flex: 1;
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin: 25px 0;
   flex-wrap: wrap;
+}
+
+.favorite-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.favorite-label {
+  font-weight: 700;
+  color: #000000;
+  font-size: 14px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-favorite-types {
+  background: #ffffff;
+  border: 3px solid #000000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease-in-out;
+}
+
+.modal-favorite-types:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
 .modal-stats {
@@ -211,6 +268,17 @@
   transform: translateY(-2px);
 }
 
+.ability-badge.hidden-ability {
+  background: #4B4B4B;
+  color: #FFFFFF;
+  border-color: #000000;
+}
+
+.ability-badge.hidden-ability:hover {
+  transform: translateY(-2px);
+  background: #666666;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -253,23 +321,6 @@
   padding: 70px 25px;
 }
 
-.loading-spinner {
-  width: 60px;
-  height: 60px;
-  border: 5px solid #134370;
-  border-top: 5px solid #FFDE00;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 25px;
-}
-
-.modal-loading p {
-  color: #134370;
-  font-weight: 600;
-  font-size: 18px;
-  margin: 0;
-}
-
 .modal-error {
   text-align: center;
   padding: 50px 25px;
@@ -306,17 +357,6 @@
   transform: translateY(0);
 }
 
-.ability-badge.hidden-ability {
-  background: #4B4B4B;
-  color: #FFFFFF;
-  border-color: #000000;
-}
-
-.ability-badge.hidden-ability:hover {
-  transform: translateY(-2px);
-  background: #666666;
-}
-
 .evolution-chain {
   display: flex;
   justify-content: space-around;
@@ -338,10 +378,11 @@
   object-fit: contain;
 }
 
-.evolution-name {
-  margin-top: 4px;
-  font-size: 20px;
-  text-transform: capitalize;
+.evolution-arrow {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 10px;
+  align-self: center;
 }
 
 @keyframes fadeIn {
@@ -366,11 +407,6 @@
   }
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 .modal-content:focus {
   outline: 3px solid #FFDE00;
   outline-offset: 2px;
@@ -391,11 +427,43 @@
   .modal-header {
     padding: 15px;
     margin: -15px -15px 20px -15px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .modal-header__left {
+    width: 100%;
+  }
+  
+  .modal-favorite {
+    margin-top: 0;
   }
   
   .modal-image {
     width: 180px;
     height: 180px;
+  }
+  
+  .types-favorite-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding: 15px;
+  }
+  
+  .types-favorite-container .modal-types {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .favorite-section {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .favorite-label {
+    font-size: 13px;
   }
   
   .stats-grid {
@@ -429,6 +497,11 @@
   .modal-image {
     width: 150px;
     height: 150px;
+  }
+  
+  .types-favorite-container {
+    padding: 12px;
+    margin: 20px 0;
   }
   
   .stats-grid {

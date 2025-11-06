@@ -11,10 +11,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('pokemon-theme') as Theme;
+    const saved = localStorage.getItem('pokemon-theme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    return saved || (systemPrefersDark ? 'dark' : 'light');
+    return saved === 'light' || saved === 'dark' ? saved : (systemPrefersDark ? 'dark' : 'light');
   });
 
   const toggleTheme = () => {

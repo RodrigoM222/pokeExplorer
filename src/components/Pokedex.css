@@ -16,20 +16,20 @@
 
 .loading,
 .no-results {
-text-align: center;
-color: #adadad;
-font-size: 20px;
-margin: 25px 0;
+  text-align: center;
+  color: #adadad;
+  font-size: 20px;
+  margin: 25px 0;
 }
 
 .error-message {
-color: #cb290d;
-font-weight: bold;
-font-size: 22px;
+  color: #cb290d;
+  font-weight: bold;
+  font-size: 22px;
 }
 
 .observer-element {
-height: 2px;
-background: transparent;
-margin: 10px 0;
+  height: 2px;
+  background: transparent;
+  margin: 10px 0;
 }

@@ -1,14 +1,15 @@
 .card {
-  background-color: #FFDE00;
-  margin: 20px auto;
+  background-color: var(--card-bg, #FFDE00);
+  margin: 10px auto;
   max-width: 750px;
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease;
   cursor: pointer;
   border-radius: 10px;
-  border: #000 solid 3px;
+  border: var(--card-border, #000) solid 3px;
   padding: 0;
   overflow: hidden;
   position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .card:hover {
@@ -25,10 +26,10 @@
   width: 100px;
   height: 100px;
   box-sizing: border-box;
-  background-color: #ffff;
+  background-color: #ffffff;
   display: block;
   margin: 15px auto 10px;
-  border: #000 solid 4px;
+  border: var(--card-border, #000) solid 4px;
   border-radius: 8px;
   transition: transform 0.3s ease-in-out;
   object-fit: contain;
@@ -57,10 +58,10 @@
   padding: 8px 0;
   display: flex;
   justify-content: center;
-  background-color: #20d;
-  border-top: #000 solid 3px;
-  border-bottom: #000 solid 3px;
-  color: #fff;
+  background-color: var(--accent-primary, #20d);
+  border-top: var(--card-border, #000) solid 3px;
+  border-bottom: var(--card-border, #000) solid 3px;
+  color: var(--text-on-accent, #fff);
   font-weight: bold;
   font-size: 16px;
 }
@@ -69,7 +70,7 @@
   font-size: 18px;
   font-weight: bold;
   margin: 10px 0;
-  color: #333;
+  color: var(--text-primary, #333);
   text-transform: capitalize;
   text-align: center;
   padding: 0 10px;
@@ -80,8 +81,8 @@
   padding: 10px 0;
   width: 100%;
   box-sizing: border-box;
-  background-color: #20d;
-  border-top: #000 solid 3px;
+  background-color: var(--accent-primary, #20d);
+  border-top: var(--card-border, #000) solid 3px;
   display: flex;
   justify-content: center;
   gap: 6px;

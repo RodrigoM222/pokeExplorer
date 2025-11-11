@@ -11,7 +11,6 @@ import {
 } from '../services/PokeServices';
 import type { Pokemon, PokemonType } from '../types';
 import { useLoading } from '../contexts/LoadingContext';
-import LoadingIndicator from './LoadingIndicator';
 import './Pokedex.css';
 
 const PAGE_SIZE = 20;
@@ -30,7 +29,6 @@ const validPokemonTypes: PokemonType[] = [
 
 export default function Pokedex() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -44,7 +42,7 @@ export default function Pokedex() {
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const loadingRef = useRef<boolean>(false);
 
-  const { withLoading } = useLoading();
+  const { withLoading, isLoading: globalLoading } = useLoading();
 
   const handlePokemonClick = useCallback((pokemonId: number) => {
     setSelectedPokemonId(pokemonId);
@@ -104,7 +102,6 @@ export default function Pokedex() {
     if (loadingRef.current || !hasMore || query.trim() !== '') return;
   
     loadingRef.current = true;
-    setIsLoading(true);
     setSearchError('');
     
     try {
@@ -144,10 +141,45 @@ export default function Pokedex() {
       console.error('Error loading pokemons:', error);
       setSearchError('Error al cargar más Pokémon');
     } finally {
-      setIsLoading(false);
       loadingRef.current = false;
     }
   }, [hasMore, query, withLoading]);
+
+  const loadInitialPokemons = useCallback(async () => {
+    setSearchError('');
+    
+    try {
+      const list = await withLoading(
+        fetchPokemonList(0, PAGE_SIZE),
+        'pokemon-initial'
+      );
+  
+      if (list.length === 0) {
+        setHasMore(false);
+        return;
+      }
+  
+      const data = await Promise.all(
+        list.map(async (p) => {
+          try {
+            const apiData = await fetchPokemon(p.name);
+            return apiData ? mapApiDataToPokemon(apiData) : null;
+          } catch (error) {
+            console.error(`Error fetching ${p.name}:`, error);
+            return null;
+          }
+        })
+      );
+  
+      const validPokemons = data.filter((p): p is Pokemon => p !== null);
+      setPokemons(validPokemons);
+      setOffset(PAGE_SIZE);
+      
+    } catch (error) {
+      console.error('Error loading initial pokemons:', error);
+      setSearchError('Error al cargar los Pokémon');
+    }
+  }, [withLoading]);
 
   const handleSearch = useCallback(async (value: string) => {
     const trimmed = value.trim();
@@ -169,22 +201,18 @@ export default function Pokedex() {
       return;
     }
 
-    setIsLoading(true);
-
     if (inputType === 'numeric') {
       const id = Number(trimmed);
       
       if (id < MIN_ID) {
         setSearchError(`El número debe ser mayor o igual a ${MIN_ID}.`);
         setPokemons([]);
-        setIsLoading(false);
         return;
       }
       
       if (id > MAX_ID) {
         setSearchError(`El número debe ser menor o igual a ${MAX_ID}.`);
         setPokemons([]);
-        setIsLoading(false);
         return;
       }
 
@@ -203,7 +231,6 @@ export default function Pokedex() {
         setSearchError('Error al buscar Pokémon');
         setPokemons([]);
       }
-      setIsLoading(false);
       return;
     }
 
@@ -218,7 +245,6 @@ export default function Pokedex() {
         if (searchResults.length === 0) {
           setSearchError('No se encontraron Pokémon con ese nombre');
           setPokemons([]);
-          setIsLoading(false);
           return;
         }
     
@@ -245,14 +271,12 @@ export default function Pokedex() {
         setSearchError('Error al realizar la búsqueda');
         setPokemons([]);
       }
-      
-      setIsLoading(false);
       return;
     }
   }, [withLoading]);
 
   useEffect(() => {
-    if (!bottomRef.current || query.trim() !== '' || !hasMore || isLoading) return;
+    if (!bottomRef.current || query.trim() !== '' || !hasMore || globalLoading) return;
 
     const currentObserver = new IntersectionObserver(
       (entries) => {
@@ -274,14 +298,14 @@ export default function Pokedex() {
         observer.current.disconnect();
       }
     };
-  }, [loadPokemons, query, hasMore, isLoading, offset]);
+  }, [loadPokemons, query, hasMore, globalLoading, offset]);
 
   useEffect(() => {
     if (isInitialLoad && query.trim() === '' && pokemons.length === 0) {
-      loadPokemons(0);
+      loadInitialPokemons();
       setIsInitialLoad(false);
     }
-  }, [isInitialLoad, query, pokemons.length, loadPokemons]);
+  }, [isInitialLoad, query, pokemons.length, loadInitialPokemons]);
 
   useEffect(() => {
     return () => {
@@ -321,21 +345,11 @@ export default function Pokedex() {
             ))}
           </div>
         ) : (
-          !isLoading && query.trim() !== '' && !searchError && (
+          !globalLoading && query.trim() !== '' && !searchError && (
             <div className="message-container">
               <p className="no-results">No se encontraron coincidencias con tu búsqueda.</p>
             </div>
           )
-        )}
-        
-        {isLoading && ( 
-          <div className="message-container">
-            <LoadingIndicator 
-              type="dots" 
-              size="large" 
-              message={query ? "Buscando..." : "Cargando Pokémon..."} 
-            />
-          </div>
         )}
         
         <div 
